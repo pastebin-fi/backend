@@ -1,0 +1,19 @@
+{
+  "name": "powerpaste",
+  "version": "1.0.0",
+  "description": "Best pastebin software ever",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pastebin-fi/PowerPaste.git"
+  },
+  "author": "pastebin.fi",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/pastebin-fi/PowerPaste/issues"
+  },
+  "homepage": "https://github.com/pastebin-fi/PowerPaste#readme"
+}
