@@ -1,6 +1,23 @@
 const express = require('express')
+const mongoose = require('mongoose')
+
+const { Schema } = mongoose;
 const app = express()
 const port = 3000
+
+
+const PasteSchema = new Schema({
+  title: String,
+  author: String,
+  content: String,
+  date: { type: Date, default: Date.now },
+  hidden: Boolean,
+  meta: {
+    votes: Number,
+    favs:  Number,
+    views: Number
+  }
+});
 
 app.locals = {
   site: {
@@ -21,5 +38,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`PowerPaste app listening at http://localhost:${port}`)
 })
