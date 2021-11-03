@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 
@@ -5,10 +6,15 @@ const { Schema } = mongoose;
 const app = express()
 const port = 3000
 
+app.use(express.urlencoded());
+app.use(express.json());
+
+mongoose.connect(process.env.MONGO_URI);
 
 const PasteSchema = new Schema({
   title: String,
   author: String,
+  ip: String,
   content: String,
   date: { type: Date, default: Date.now },
   hidden: Boolean,
@@ -18,6 +24,8 @@ const PasteSchema = new Schema({
     views: Number
   }
 });
+
+const Paste = mongoose.model('Paste', PasteSchema);
 
 app.locals = {
   site: {
@@ -35,6 +43,16 @@ app.set('view engine', 'ejs')
 
 app.get('/', (req, res) => {
     res.render('pages/index')
+})
+
+app.get('/new', (req, res) => {
+  res.render('pages/new')
+})
+
+
+// API
+app.post('/api/paste', (req, res) => {
+  res.send({ hi: req.body.paste })
 })
 
 app.listen(port, () => {

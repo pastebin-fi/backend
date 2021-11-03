@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head'); %>
+</head>
+<body class="container max-w-full max-h-screen">
+
+  <header class="ml-8 mr-8">
+    <%- include('../partials/header'); %>
+  </header>
+
+  <main class="ml-8 mr-8">
+    <form action="/api/paste" method="post">
+        <div class="h-screen max-h-screen">
+            <div class="container h-2/3 p-8 break-all max-w-md rounded-xl border-black border-2 min-w-full bg-yellow-100">
+                <textarea name="paste" class="bg-yellow-100 outline-none resize-none w-full h-full" placeholder="<%= paste.content %>"></textarea>
+            </div>
+            <div class="container mt-8">
+                <input type="submit" value="Luo liite" class="p-4 max-w-md rounded-xl border-double border-black border-4 bg-yellow-100 hover:bg-yellow-200 cursor-pointer">
+            </div>    
+        </div>        
+    </form>
+  </main>
+
+  </body>
+</html>
