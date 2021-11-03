@@ -52,7 +52,22 @@ app.get('/new', (req, res) => {
 
 // API
 app.post('/api/paste', (req, res) => {
-  res.send({ hi: req.body.paste })
+  const paste = {
+    title: req.body.title,
+    author: null,
+    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress.replace(/^.*:/, ''),
+    content: req.body.paste,
+    hidden: true,
+    meta: {
+      votes: null,
+      favs:  null,
+      views: 0
+    }  
+  }
+  Paste.create(paste, (err, paste) => {
+    if (err) throw err;
+    res.send(paste)
+  })
 })
 
 app.listen(port, () => {
