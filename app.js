@@ -41,8 +41,8 @@ const Paste = mongoose.model('Paste', PasteSchema);
 
 app.locals = {
   site: {
-      title: 'PowerPaste',
-      description: 'The best pastebin service ever',
+      title: process.env.TITLE,
+      description: process.env.DESCRIPTION,
       hostname: process.env.HOSTNAME
   },
   defaultPaste: {
