@@ -11,8 +11,20 @@ app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI);
 
+const makeid = (length) => {
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+
+  return result;
+}
+
 const PasteSchema = new Schema({
   title: String,
+  id: { type: String, default: makeid(12) },
   author: String,
   ip: String,
   content: String,
