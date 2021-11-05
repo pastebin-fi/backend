@@ -1,5 +1,5 @@
 <%
-    const truncate = (input) => input.length > 50 ? `${input.substring(0, 50)}...` : input;
+    const truncate = (input, size) => input.length > size ? `${input.substring(0, size)}...` : input;
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,8 +17,8 @@
     <div class="grid grid-cols-4 gap-4">
         <% for (let i=0; i < pastes.length; i++) { %>
             <article class="container rounded-xl border-black border-2 min-w-full bg-yellow-100 p-8">
-                <h2 class="text-2xl"><a class="hover:underline" href="/p/<%= pastes[i].id %>"><%= pastes[i].title ? pastes[i].title : "Nimetön" %></a></h2>
-                <p class="mt-5"><%= truncate(pastes[i].content) %></p>
+                <h2 class="text-2xl"><a class="hover:underline break-words" href="/p/<%= pastes[i].id %>"><%= pastes[i].title ? truncate(pastes[i].title, 50) : "Nimetön" %></a></h2>
+                <p class="mt-5 break-words"><%= truncate(pastes[i].content, 100) %></p>
             </article>
         <% } %>
     </div>
