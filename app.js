@@ -69,7 +69,7 @@ app.get('/new', (req, res) => {
 })
 
 app.get('/latest', (req, res) => {
-  Paste.find({}).sort('date').limit(20).exec((err, pastes) => {
+  Paste.find({}).sort({date:-1}).limit(20).exec((err, pastes) => {
     if (err) throw err
     res.render('pages/latest', {
       pastes
