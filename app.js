@@ -68,6 +68,26 @@ app.get('/new', (req, res) => {
   res.render('pages/index')
 })
 
+app.post('/new', (req, res) => {
+  const paste = {
+    title: req.body.title,
+    author: null,
+    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress.replace(/^.*:/, ''),
+    content: req.body.paste,
+    hidden: req.body.hidden === "on" ? true : false,
+    meta: {
+      votes: null,
+      favs:  null,
+      views: 0
+    }
+  }
+  Paste.create(paste, (err, paste) => {
+    if (err) throw err;
+    res.redirect('/p/' + paste.id)
+  })
+})
+
+
 app.get('/latest', (req, res) => {
   Paste.find({}).sort({date:-1}).limit(20).exec((err, pastes) => {
     if (err) throw err
@@ -113,26 +133,6 @@ app.get('/sitemap.xml', (req, res) => {
     res.render('sitemap', {
       pastes
     })
-  })
-})
-
-// API
-app.post('/api/paste', (req, res) => {
-  const paste = {
-    title: req.body.title,
-    author: null,
-    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress.replace(/^.*:/, ''),
-    content: req.body.paste,
-    hidden: req.body.hidden === "on" ? true : false,
-    meta: {
-      votes: null,
-      favs:  null,
-      views: 0
-    }
-  }
-  Paste.create(paste, (err, paste) => {
-    if (err) throw err;
-    res.send(paste)
   })
 })
 
