@@ -121,8 +121,9 @@ app.get('/search', (req, res) => {
 })
 
 app.get('/p/:id', (req, res) => {
-  Paste.findOne({ id: req.params.id }).exec((err, paste) => {
+  Paste.findOne({ id: req.params.id }).exec(async (err, paste) => {
     if (err) throw err
+    await Paste.findOneAndUpdate({ id: req.params.id }, {$inc : {'meta.views' : 1}})
     res.render('pages/paste', {
       paste
     })
@@ -130,16 +131,18 @@ app.get('/p/:id', (req, res) => {
 })
 
 app.get('/r/:id', (req, res) => {
-  Paste.findOne({ id: req.params.id }).exec((err, paste) => {
+  Paste.findOne({ id: req.params.id }).exec(async (err, paste) => {
     if (err) throw err
+    await Paste.findOneAndUpdate({ id: req.params.id }, {$inc : {'meta.views' : 1}})
     res.set('Content-Type', 'text/plain');
     res.send(paste.content)
   })
 })
 
 app.get('/dl/:id', (req, res) => {
-  Paste.findOne({ id: req.params.id }).exec((err, paste) => {
+  Paste.findOne({ id: req.params.id }).exec(async (err, paste) => {
     if (err) throw err
+    await Paste.findOneAndUpdate({ id: req.params.id }, {$inc : {'meta.views' : 1}})
     res.status(200)
       .attachment(`${paste.title}.txt`)
       .send(paste.content)

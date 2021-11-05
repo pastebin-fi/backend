@@ -20,7 +20,8 @@
       </div>
       <div>
         <span class="p-1 bg-gray-500 text-white"><%= paste.date ? paste.date.toLocaleDateString('fi-FI', { year: 'numeric', month: 'long', day: 'numeric' }) : "Yksi ikuisuus sitten" %></span>
-        <span class="p-1 bg-gray-500 text-white"><%= paste.hidden ? "piilotettu" : "" %></span>  
+        <span class="p-1 bg-gray-500 text-white"><%= paste.meta.views ? paste.meta.views : 0 // Some old data does not have views %> näyttökertaa</span>
+        <span class="p-1 bg-gray-500 text-white"><%= paste.hidden ? "piilotettu" : "" %></span>
       </div>
       <pre class="whitespace-pre-wrap mt-5"><%= paste.content %></pre>
     </div>
