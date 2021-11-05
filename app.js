@@ -5,21 +5,37 @@ const session = require('express-session')
 
 const { Schema } = mongoose;
 const app = express()
-const port = 3000
+
+const urlRegex = new RegExp("(?<protocol>https?):\/\/(?<hostname>[A-Za-z.0-9]*)\/?:?(?<port>\d*)", "g")
+
+const urlMatch = urlRegex.exec(process.env.SITE_URL)
+
+console.log(urlMatch.groups)
+
+const protocol = urlMatch.groups.protocol ? urlMatch.groups.protocol : "http" 
+const hostname = urlMatch.groups.hostname ? urlMatch.groups.hostname : "localhost" 
+const port = urlMatch.groups.port ? urlMatch.groups.port : 3000 
+
 
 let sess = {
   secret: process.env.SECRET,
-  cookie: {}
+  cookie: {},
+  resave: true,
+  saveUninitialized: true
 }
 
 if (process.env.TRUST_PROXY > 0) {
   app.set('trust proxy', process.env.TRUST_PROXY)
+}
+
+if (protocol.includes("https")) {
   sess.cookie.secure = true
+  console.log("Using secure cookies...")
 }
 
 app.use(session(sess))
 
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI);
@@ -62,7 +78,7 @@ app.locals = {
   site: {
       title: process.env.TITLE,
       description: process.env.DESCRIPTION,
-      hostname: process.env.HOSTNAME
+      hostname: hostname
   },
   defaultPaste: {
     content: `Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dicta tempore ad amet accusamus mollitia quis culpa provident odio facere, dolor quibusdam deleniti fuga minus vero molestias asperiores sequi! Officia atque, hic aspernatur culpa necessitatibus cumque doloremque rem. Fugiat vitae consectetur dolore eos voluptatibus vel, laborum saepe repellendus, dignissimos quaerat aut minus suscipit omnis possimus ipsam cumque sint repellat doloribus quasi neque quos laboriosam temporibus ullam? Ipsa maiores sequi quod perspiciatis vero cumque voluptatum quibusdam, ex impedit necessitatibus! Aliquid nulla ipsam, cupiditate aspernatur id eius fugit quasi maxime esse nam cum. Sunt tempore exercitationem praesentium, recusandae omnis asperiores sequi mollitia amet!
@@ -192,5 +208,5 @@ app.get('/sitemap.xml', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`PowerPaste app listening at http://${process.env.HOSTNAME}:${port}`)
+  console.log(`PowerPaste app listening at http://${hostname}:${port}`)
 })
