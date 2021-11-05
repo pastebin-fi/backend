@@ -11,7 +11,11 @@
 
   <main class="ml-8 mr-8">
     <div class="container p-8 break-all max-w-md rounded-xl border-black border-2 min-w-full bg-yellow-100">
-      <pre class="whitespace-pre-wrap"><%= paste.content %></pre>
+      <div class="mb-5">
+        <h2 class="text-2xl"><%= paste.title ? paste.title : "Nimetön" %></h2>
+      </div>
+      <span class="p-1 bg-gray-500 text-white"><%= paste.date.toLocaleDateString('fi-FI', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+      <pre class="whitespace-pre-wrap mt-5"><%= paste.content %></pre>
     </div>
   </main>
 
