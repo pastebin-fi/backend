@@ -57,7 +57,7 @@ app.post('/api/paste', (req, res) => {
     author: null,
     ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress.replace(/^.*:/, ''),
     content: req.body.paste,
-    hidden: true,
+    hidden: req.body.hidden === "on" ? true : false,
     meta: {
       votes: null,
       favs:  null,
