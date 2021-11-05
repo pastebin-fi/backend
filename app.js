@@ -69,6 +69,10 @@ app.get('/new', (req, res) => {
 })
 
 app.post('/new', (req, res) => {
+  if (req.body.paste === "") {
+    res.redirect('/')
+    return
+  }
   const paste = {
     title: req.body.title,
     author: null,
@@ -98,7 +102,7 @@ app.get('/latest', (req, res) => {
 })
 
 app.get('/search', (req, res) => {
-  // Use later full text indexes...s
+  // Use later full text indexes...
 
   let query = req.query.q
   let page = req.query.page
