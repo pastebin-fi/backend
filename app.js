@@ -93,12 +93,29 @@ app.post('/new', (req, res) => {
 
 
 app.get('/latest', (req, res) => {
-  Paste.find({ hidden: false }).sort({date:-1}).limit(20).exec((err, pastes) => {
-    if (err) throw err
-    res.render('pages/latest', {
-      pastes
+  Paste.find({ hidden: false })
+    .sort({date:-1})
+    .limit(20)
+    .exec((err, pastes) => {
+      if (err) throw err
+      res.render('pages/list', {
+        pastes,
+        title: "Viimeisimmät"
+      })
     })
-  })
+})
+
+app.get('/popular', (req, res) => {
+  Paste.find({ hidden: false })
+    .sort('-meta.views')
+    .limit(20)
+    .exec((err, pastes) => {
+      if (err) throw err
+      res.render('pages/list', {
+        pastes,
+        title: "Suosituimmat"
+      })
+    })
 })
 
 app.get('/search', (req, res) => {
@@ -114,8 +131,9 @@ app.get('/search', (req, res) => {
     .limit(limit)
     .exec((err, pastes) => {
       if (err) throw err
-      res.render('pages/latest', {
-        pastes
+      res.render('pages/list', {
+        pastes,
+        title: ""
       })
   })
 })
