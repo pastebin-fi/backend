@@ -62,7 +62,7 @@ app.post('/api/paste', (req, res) => {
       votes: null,
       favs:  null,
       views: 0
-    }  
+    }
   }
   Paste.create(paste, (err, paste) => {
     if (err) throw err;
