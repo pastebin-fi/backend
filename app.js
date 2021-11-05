@@ -37,6 +37,12 @@ const PasteSchema = new Schema({
   }
 });
 
+PasteSchema.index({
+  title: 'text',
+  content: 'text', 
+  id: 'text'
+});
+
 const Paste = mongoose.model('Paste', PasteSchema);
 
 app.locals = {
@@ -68,6 +74,21 @@ app.get('/latest', (req, res) => {
     res.render('pages/latest', {
       pastes
     })
+  })
+})
+
+app.get('/search', (req, res) => {
+  // Use later full text indexes...s
+
+  let query = req.query.q
+  Paste.find({ title: { "$regex": query, "$options": "i" } })
+    .sort('date')
+    .limit(20)
+    .exec((err, pastes) => {
+      if (err) throw err
+      res.render('pages/latest', {
+        pastes
+      })
   })
 })
 

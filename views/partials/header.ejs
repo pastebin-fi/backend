@@ -1,5 +1,11 @@
 <div class="container p-6  max-w-md rounded-xl border-double border-black border-4 min-w-full bg-yellow-100 mb-8">
-    <a href="/"><h1 class="inline-block"><%= site.title %></h1></a>
-    <a href="/" class="p-6 hover:underline">Uusi</a>
-    <a href="/latest" class="p-6 hover:underline">Viimeisimmät</a>
+    <div class="p-0.5 border-4 border-yellow-100 max-w-md inline-block">
+        <a href="/"><h1 class="inline-block"><%= site.title %></h1></a>
+        <a href="/" class="p-6 hover:underline">Uusi</a>
+        <a href="/latest" class="p-6 hover:underline">Viimeisimmät</a>    
+    </div>
+
+    <form action="/search" method="get" class="float-right">
+        <input type="text" name="q" placeholder="Hae..." class="rounded-xl outline-none p-0.5 border-dotted border-4">
+    </form>
 </div>
