@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/new', (req, res) => {
-  res.render('pages/new')
+  res.render('pages/index')
 })
 
 app.get('/latest', (req, res) => {
