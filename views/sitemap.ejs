@@ -6,7 +6,7 @@
 
     <% for (let i=0; i < pastes.length; i++) { %>
         <url>
-            <loc>https://<%= site.hostname %>/p/<%= pastes[i].id %>/</loc>
+            <loc><%= site.protocol %>://<%= site.hostname %>/p/<%= pastes[i].id %>/</loc>
         </url>
     <% } %>
 </urlset>
