@@ -192,5 +192,5 @@ app.get('/sitemap.xml', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`PowerPaste app listening at http://localhost:${port}`)
+  console.log(`PowerPaste app listening at http://${process.env.HOSTNAME}:${port}`)
 })
