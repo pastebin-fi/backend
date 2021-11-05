@@ -1,10 +1,23 @@
 require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
+const session = require('express-session')
 
 const { Schema } = mongoose;
 const app = express()
 const port = 3000
+
+let sess = {
+  secret: process.env.SECRET,
+  cookie: {}
+}
+
+if (process.env.TRUST_PROXY > 0) {
+  app.set('trust proxy', process.env.TRUST_PROXY)
+  sess.cookie.secure = true
+}
+
+app.use(session(sess))
 
 app.use(express.urlencoded());
 app.use(express.json());
@@ -76,7 +89,7 @@ app.post('/new', (req, res) => {
   const paste = {
     title: req.body.title,
     author: null,
-    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress.replace(/^.*:/, ''),
+    ip: process.env.TRUST_PROXY > 0 ? req.headers['x-forwarded-for'] : req.socket.remoteAddress.replace(/^.*:/, ''),
     content: req.body.paste,
     hidden: req.body.hidden === "on" ? true : false,
     meta: {
