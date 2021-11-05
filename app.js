@@ -81,9 +81,13 @@ app.get('/search', (req, res) => {
   // Use later full text indexes...s
 
   let query = req.query.q
+  let page = req.query.page
+  let skip = page ? page : 0 * 10
+  let limit = skip + 10
   Paste.find({ title: { "$regex": query, "$options": "i" } })
     .sort('date')
-    .limit(20)
+    .skip(skip)
+    .limit(limit)
     .exec((err, pastes) => {
       if (err) throw err
       res.render('pages/latest', {
