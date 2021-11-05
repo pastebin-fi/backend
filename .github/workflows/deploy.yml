@@ -1,6 +1,8 @@
 name: Deploy to server
 
-on: [push]
+on:
+  - [push]
+  - workflow_dispatch
 
 jobs:
 
