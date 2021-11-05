@@ -10,8 +10,6 @@ const urlRegex = new RegExp("(?<protocol>https?):\/\/(?<hostname>[A-Za-z.0-9]*)\
 
 const urlMatch = urlRegex.exec(process.env.SITE_URL)
 
-console.log(urlMatch.groups)
-
 const protocol = urlMatch.groups.protocol ? urlMatch.groups.protocol : "http" 
 const hostname = urlMatch.groups.hostname ? urlMatch.groups.hostname : "localhost" 
 const port = urlMatch.groups.port ? urlMatch.groups.port : 3000 
