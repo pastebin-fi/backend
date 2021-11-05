@@ -125,6 +125,23 @@ app.get('/p/:id', (req, res) => {
   })
 })
 
+app.get('/r/:id', (req, res) => {
+  Paste.findOne({ id: req.params.id }).exec((err, paste) => {
+    if (err) throw err
+    res.set('Content-Type', 'text/plain');
+    res.send(paste.content)
+  })
+})
+
+app.get('/dl/:id', (req, res) => {
+  Paste.findOne({ id: req.params.id }).exec((err, paste) => {
+    if (err) throw err
+    res.status(200)
+      .attachment(`${paste.title}.txt`)
+      .send(paste.content)
+  })
+})
+
 // Sitemap and other
 app.get('/sitemap.xml', (req, res) => {
   Paste.find().exec((err, pastes) => {

@@ -12,10 +12,16 @@
   <main class="ml-8 mr-8">
     <div class="container p-8 break-all max-w-md rounded-xl border-black border-2 min-w-full bg-yellow-100">
       <div class="mb-5">
-        <h2 class="text-2xl"><%= paste.title ? paste.title : "Nimetön" %></h2>
+        <h2 class="text-2xl inline-block"><%= paste.title ? paste.title : "Nimetön" %></h2>
+        <div class="float-right">
+          <a class="flex-shrink p-2 max-w-md rounded-xl border-double border-black border-4 bg-yellow-100 hover:bg-yellow-200" href="/r/<%= paste.id %>">Raaka</a>
+          <a class="flex-shrink p-2 max-w-md rounded-xl border-double border-black border-4 bg-yellow-100 hover:bg-yellow-200" href="/dl/<%= paste.id %>">Lataa</a>
+        </div>
       </div>
-      <span class="p-1 bg-gray-500 text-white"><%= paste.date ? paste.date.toLocaleDateString('fi-FI', { year: 'numeric', month: 'long', day: 'numeric' }) : "Yksi ikuisuus sitten" %></span>
-      <span class="p-1 bg-gray-500 text-white"><%= paste.hidden ? "piilotettu" : "" %></span>
+      <div>
+        <span class="p-1 bg-gray-500 text-white"><%= paste.date ? paste.date.toLocaleDateString('fi-FI', { year: 'numeric', month: 'long', day: 'numeric' }) : "Yksi ikuisuus sitten" %></span>
+        <span class="p-1 bg-gray-500 text-white"><%= paste.hidden ? "piilotettu" : "" %></span>  
+      </div>
       <pre class="whitespace-pre-wrap mt-5"><%= paste.content %></pre>
     </div>
   </main>
