@@ -1,0 +1,27 @@
+<%
+    const truncate = (input) => input.length > 50 ? `${input.substring(0, 50)}...` : input;
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head'); %>
+</head>
+<body class="container max-w-full max-h-screen">
+
+  <header class="ml-8 mr-8">
+    <%- include('../partials/header'); %>
+  </header>
+
+  <main class="ml-8 mr-8">
+    <div class="grid grid-cols-4 gap-4">
+        <% for (let i=0; i < pastes.length; i++) { %>
+            <article class="container rounded-xl border-black border-2 min-w-full bg-yellow-100 p-8">
+                <h2 class="text-2xl"><%= pastes[i].title %></h2>
+                <p class="mt-5"><%= truncate(pastes[i].content) %></p>
+            </article>
+        <% } %>
+    </div>
+  </main>
+
+  </body>
+</html>

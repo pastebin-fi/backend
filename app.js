@@ -49,6 +49,14 @@ app.get('/new', (req, res) => {
   res.render('pages/new')
 })
 
+app.get('/latest', (req, res) => {
+  Paste.find({}).sort('date').limit(20).exec((err, pastes) => {
+    if (err) throw err
+    res.render('pages/latest', {
+      pastes
+    })
+  })
+})
 
 // API
 app.post('/api/paste', (req, res) => {
