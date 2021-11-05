@@ -89,7 +89,7 @@ app.post('/new', (req, res) => {
 
 
 app.get('/latest', (req, res) => {
-  Paste.find({}).sort({date:-1}).limit(20).exec((err, pastes) => {
+  Paste.find({ hidden: false }).sort({date:-1}).limit(20).exec((err, pastes) => {
     if (err) throw err
     res.render('pages/latest', {
       pastes
@@ -104,7 +104,7 @@ app.get('/search', (req, res) => {
   let page = req.query.page
   let skip = page ? page : 0 * 10
   let limit = skip + 10
-  Paste.find({ title: { "$regex": query, "$options": "i" } })
+  Paste.find({ title: { "$regex": query, "$options": "i" }, hidden: false })
     .sort('date')
     .skip(skip)
     .limit(limit)

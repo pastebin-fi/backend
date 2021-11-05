@@ -14,7 +14,8 @@
       <div class="mb-5">
         <h2 class="text-2xl"><%= paste.title ? paste.title : "Nimetön" %></h2>
       </div>
-      <span class="p-1 bg-gray-500 text-white"><%= paste.date.toLocaleDateString('fi-FI', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+      <span class="p-1 bg-gray-500 text-white"><%= paste.date ? paste.date.toLocaleDateString('fi-FI', { year: 'numeric', month: 'long', day: 'numeric' }) : "Yksi ikuisuus sitten" %></span>
+      <span class="p-1 bg-gray-500 text-white"><%= paste.hidden ? "piilotettu" : "" %></span>
       <pre class="whitespace-pre-wrap mt-5"><%= paste.content %></pre>
     </div>
   </main>
