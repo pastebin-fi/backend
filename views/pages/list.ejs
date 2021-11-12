@@ -8,15 +8,13 @@
 </head>
 <body class="container max-w-full max-h-screen">
 
-  <header>
-    <%- include('../partials/header'); %>
-  </header>
+  <%- include('../partials/header'); %>
 
   <main class="ml-8 mr-8">
     <h1 class="mb-8 text-3xl"><%= title %></h1>
     <div class="grid grid-cols-4 gap-4">
         <% for (let i=0; i < pastes.length; i++) { %>
-            <article class="container rounded-xl border-black border-2 min-w-full bg-yellow-100 p-8">
+            <article class="container border-black border-2 border-gray-400 p-8">
                 <h2 class="text-2xl"><a class="hover:underline break-words" href="/p/<%= pastes[i].id %>"><%= pastes[i].title ? truncate(pastes[i].title, 50) : "Nimetön" %></a></h2>
                 <p class="mt-5 break-words"><%= pastes[i].content ? truncate(pastes[i].content, 100) : "Tyhjyys" %></p>
             </article>
