@@ -1,12 +1,14 @@
-<div class="container p-6  max-w-md rounded-xl border-double border-black border-4 min-w-full bg-yellow-100 mb-8">
-    <div class="p-0.5 border-4 border-yellow-100 inline-block">
-        <a href="/"><h1 class="inline-block"><%= site.title %></h1></a>
-        <a href="/" class="p-6 hover:underline">Uusi</a>
-        <a href="/latest" class="p-6 hover:underline">Viimeisimmät</a>    
-        <a href="/popular" class="p-6 hover:underline">Suosituimmat</a>    
+<header>
+    <div class="container p-4 min-w-full mb-8 bg-gray-900 text-white">
+        <div class="p-0.5 inline-block">
+            <a href="/"><h1 class="inline-block"><%= site.title %></h1></a>
+            <a href="/" class="p-6 hover:bg-white hover:text-black">Uusi</a>
+            <a href="/latest" class="p-6 hover:bg-white hover:text-black">Viimeisimmät</a>    
+            <a href="/popular" class="p-6 hover:bg-white hover:text-black">Suosituimmat</a>    
+        </div>
+    
+        <form action="/search" method="get" class="float-right">
+            <input type="text" name="q" placeholder="Hae..." class="p-0.5 bg-gray-700 border-solid border-gray-800 border-2">
+        </form>
     </div>
-
-    <form action="/search" method="get" class="float-right">
-        <input type="text" name="q" placeholder="Hae..." class="rounded-xl outline-none p-0.5 border-dotted border-4">
-    </form>
-</div>
+</header>
