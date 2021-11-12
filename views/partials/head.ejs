@@ -1,5 +1,11 @@
 <meta charset="UTF-8">
 <title><%= site.title %></title>
-
+<% if (typeof paste !== 'undefined') { %>
+    <% function formatBytes(a,b=2,k=1024){with(Math){let d=floor(log(a)/log(k));return 0==a?"0 Bytes":parseFloat((a/pow(k,d)).toFixed(max(0,b)))+" "+["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"][d]}} %>
+    <meta property="og:title" content="<%= paste.title %>">
+    <meta property="og:description" content="Koko: <%= formatBytes(Buffer.byteLength(paste.content, 'utf8')) %> | Katselukertoja: <%= paste.meta.views %>d">
+    <meta property="og:type" content="article">
+    <meta property="article:published_time" content="<%= paste.date %>">
+<% }  %>
 <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
