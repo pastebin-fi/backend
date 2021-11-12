@@ -10,19 +10,19 @@
   <main class="ml-8 mr-8 container">
     <form action="/new" method="post">
         <div class="h-screen max-h-screen">
-            <div class="container h-2/3 p-8 break-all max-w-md rounded-xl border-black border-2 min-w-full bg-yellow-100">
-                <textarea name="paste" class="bg-yellow-100 outline-none resize-none w-full h-full" placeholder="<%= defaultPaste.content %>"></textarea>
+            <div class="container h-2/3 p-8 break-all border-black border-2 border-gray-400 min-w-full">
+                <textarea name="paste" required class="font-mono outline-none resize-none w-full h-full" placeholder="<%= defaultPaste.content %>"></textarea>
             </div>
             <div class="container mt-8 min-w-full">
               <div class="flex gap-5">
-                <input type="submit" value="Luo liite" class="flex-shrink p-4 max-w-md rounded-xl border-double border-black border-4 bg-yellow-100 hover:bg-yellow-200 cursor-pointer">
-                <div class="flex-1 p-4 rounded-xl border-double border-black border-4 bg-yellow-100 flex gap-5">
-                  <div class="flex-shrink p-0.5 border-solid border-4 border-yellow-100">
+                <input type="submit" value="Luo liite" class="flex-shrink rounded cursor-pointer flex-shrink p-3 max-w-md border-black border-2 text-white bg-gray-600 hover:bg-gray-500">
+                <div class="flex-1 p-4 border-black border-2 border-gray-400 flex gap-5">
+                  <div class="flex-shrink p-0.5 border-solid border-4 border-white">
                     <input type="checkbox" name="hidden" id="hidden">
                     <label for="hidden">Yksityinen</label>
                   </div>
                   <div class="flex-shrink">
-                    <input type="text" name="title" placeholder="Nimi..." class="rounded-xl outline-none p-0.5 border-dotted border-4 border-light-blue-500">
+                    <input type="text" name="title" placeholder="Nimi..." class="outline-none p-0.5 border-dotted border-4 border-light-blue-500">
                   </div>
                 </div>
               </div>
