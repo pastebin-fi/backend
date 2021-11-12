@@ -2,28 +2,46 @@
 <html lang="en">
 <head>
   <%- include('../partials/head'); %>
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js" integrity="sha512-Pbb8o120v5/hN/a6LjF4N4Lxou+xYZ0QcVF8J6TWhBbHmctQWd8O6xTDmHpE/91OjPzCk4JRoiJsexHYg4SotQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Line number plugin for higlight.js -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
 </head>
 <body class="container max-w-full">
 
   <%- include('../partials/header'); %>
 
   <main class="ml-8 mr-8">
-    <div class="container p-8 break-all max-w-md rounded-xl border-black border-2 min-w-full bg-yellow-100">
+    <div class="container p-8 break-all max-w-md min-w-full">
       <div class="mb-5">
         <h2 class="text-2xl inline-block"><%= paste.title ? paste.title : "Nimetön" %></h2>
         <div class="float-right">
-          <a class="flex-shrink p-2 max-w-md rounded-xl border-double border-black border-4 bg-yellow-100 hover:bg-yellow-200" href="/r/<%= paste.id %>">Raaka</a>
-          <a class="flex-shrink p-2 max-w-md rounded-xl border-double border-black border-4 bg-yellow-100 hover:bg-yellow-200" href="/dl/<%= paste.id %>">Lataa</a>
+          <a class="flex-shrink p-1 max-w-md border-black border-2 text-white bg-gray-600 hover:text-black hover:bg-gray-400" href="/r/<%= paste.id %>">Raaka</a>
+          <a class="flex-shrink p-1 max-w-md border-black border-2 bg-gray-600 text-white hover:text-black hover:bg-gray-400" href="/dl/<%= paste.id %>">Lataa</a>
         </div>
       </div>
-      <div>
+      <div class="mb-8">
         <span class="p-1 bg-gray-500 text-white"><%= paste.date ? paste.date.toLocaleDateString('fi-FI', { year: 'numeric', month: 'long', day: 'numeric' }) : "Yksi ikuisuus sitten" %></span>
         <span class="p-1 bg-gray-500 text-white"><%= paste.meta.views ? paste.meta.views : 0 // Some old data does not have views %> näyttökertaa</span>
         <span class="p-1 bg-gray-500 text-white"><%= paste.hidden ? "piilotettu" : "" %></span>
       </div>
-      <pre class="whitespace-pre-wrap mt-5"><%= paste.content %></pre>
+      <hr>
+      <pre class="whitespace-pre-wrap mt-5 language-python"><%= paste.content %></pre>
     </div>
   </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      document.querySelectorAll('pre').forEach((el) => {
+        hljs.highlightElement(el);
+
+        console.log(`Detected language as ${el.result.language} with relevance ${el.result.relevance}`)
+      });
+    });
+  </script>
 
   </body>
 </html>
