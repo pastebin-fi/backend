@@ -65,6 +65,23 @@ const PasteSchema = new Schema({
   }
 });
 
+const UserSchema = new Schema({
+  name: String,
+  pwHash: String,
+  ip: {
+    last: String,
+    all: [String]
+  },
+  registered: { type: Date, default: Date.now },
+  roles: [String],
+  meta: {
+    pic: String,
+    bio: String,
+    followCount: Number,
+  },
+  followed: [String],
+})
+
 PasteSchema.index({
   title: 'text',
   content: 'text', 
