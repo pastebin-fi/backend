@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <%- include('../partials/head'); %>
+  <% function formatBytes(a,b=2,k=1024){with(Math){let d=floor(log(a)/log(k));return 0==a?"0 Tavua":parseFloat((a/pow(k,d)).toFixed(max(0,b)))+" "+["Tavua","KB","MB","GB","TB","PB","EB","ZB","YB"][d]}} %>
 
   <!-- Highlight.js -->
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
@@ -20,7 +21,7 @@
         <h2 class="text-2xl inline-block"><%= paste.title ? paste.title : "Nimetön" %></h2>
         <div class="float-right">
           <a class="flex-shrink p-1 max-w-md border-black border-2 text-white bg-gray-600 hover:text-black hover:bg-gray-400" href="/r/<%= paste.id %>">Raaka</a>
-          <a class="flex-shrink p-1 max-w-md border-black border-2 bg-gray-600 text-white hover:text-black hover:bg-gray-400" href="/dl/<%= paste.id %>">Lataa</a>
+          <a class="flex-shrink p-1 max-w-md border-black border-2 bg-gray-600 text-white hover:text-black hover:bg-gray-400" href="/dl/<%= paste.id %>">Lataa (<%= formatBytes(paste.meta.size) %>)</a>
         </div>
       </div>
       <div class="mb-8">

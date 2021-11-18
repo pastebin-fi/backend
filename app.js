@@ -60,7 +60,8 @@ const PasteSchema = new Schema({
   meta: {
     votes: Number,
     favs:  Number,
-    views: Number
+    views: Number,
+    size:  Number,
   }
 });
 
@@ -111,8 +112,9 @@ app.post('/new', (req, res) => {
     meta: {
       votes: null,
       favs:  null,
-      views: 0
-    }
+      views: 0,
+      size: Buffer.byteLength(req.body.paste, 'utf8'),  
+    },
   }
   Paste.create(paste, (err, paste) => {
     if (err) throw err;
@@ -171,6 +173,11 @@ app.get('/p/:id', (req, res) => {
   Paste.findOne({ id: req.params.id }).exec(async (err, paste) => {
     if (err) throw err
     await Paste.findOneAndUpdate({ id: req.params.id }, {$inc : {'meta.views' : 1}})
+    if (!paste.meta.size) {
+      paste.meta.size = Buffer.byteLength(paste.content, 'utf8')
+      await Paste.findOneAndUpdate({ id: req.params.id }, {$inc : {'meta.size' : paste.meta.size}})
+    }
+
     res.render('pages/paste', {
       paste
     })
