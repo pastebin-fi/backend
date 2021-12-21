@@ -1,14 +1,29 @@
-<header>
-    <div class="container p-4 min-w-full mb-8 bg-gray-900 text-white">
-        <div class="p-0.5 inline-block">
-            <a href="/"><h1 class="inline-block"><%= site.title %></h1></a>
-            <a href="/" class="p-6 hover:bg-white hover:text-black">Uusi</a>
-            <a href="/latest" class="p-6 hover:bg-white hover:text-black">Viimeisimmät</a>    
-            <a href="/popular" class="p-6 hover:bg-white hover:text-black">Suosituimmat</a>    
-        </div>
-    
-        <form action="/search" method="get" class="float-right">
-            <input type="text" name="q" placeholder="Hae..." class="p-0.5 bg-gray-700 border-solid border-gray-800 border-2">
-        </form>
+<header class="ml-4 mr-4">
+  <div
+    class="navbar mb-2 shadow-lg bg-neutral text-neutral-content rounded-box"
+  >
+    <div class="flex-none px-2 mx-2">
+      <span class="text-lg font-bold"><%= site.title %></span>
     </div>
+    <div class="flex-1 px-2 mx-2">
+      <div class="items-stretch hidden lg:flex">
+        <a href="/" class="btn btn-ghost btn-sm rounded-btn"> Luo liite </a>
+        <a href="/latest" class="btn btn-ghost btn-sm rounded-btn"> Selaa </a>
+      </div>
+    </div>
+    <div class="flex-1 lg:flex-none">
+      <form action="/search" method="get">
+        <div class="form-control">
+          <input placeholder="Hae liitteitä" name="q" class="input input-ghost" type="text">
+        </div>
+      </div> 
+      <div class="flex-none">
+        <button type="submit" class="btn btn-square btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current">             
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>             
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
 </header>
