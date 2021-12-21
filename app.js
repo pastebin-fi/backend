@@ -86,7 +86,12 @@ const UserSchema = new Schema({
 PasteSchema.index({
   title: 'text',
   content: 'text', 
-});
+}, {
+  name: 'Search index', 
+  weights: {
+    title: 10, 
+    content: 6
+  }});
 
 const Paste = mongoose.model('Paste', PasteSchema);
 
@@ -169,13 +174,13 @@ app.get('/popular', (req, res) => {
 })
 
 app.get('/search', async (req, res) => {
-  // Use later full text indexes...
+  // Highlight the search result for client.
 
   let query = req.query.q || ""
   let page = !(+req.query.page > 0) ? 1 : +req.query.page || 1
   let skip = (page-1) * 10
   let limit = skip + 10
-  let sorting = (req.query.sorting && ["viimeisin", "vanhin", "suurin", "suosituin"].includes(req.query.sorting)) ? req.query.sorting : "viimeisin"
+  let sorting = (req.query.sorting && ["viimeisin", "vanhin", "suurin", "suosituin"].includes(req.query.sorting)) ? req.query.sorting : "olennaisin"
   let search = { hidden: false, $text: { $search: query } }
 
   let foundCount = await Paste.countDocuments(search).exec();
@@ -203,6 +208,9 @@ app.get('/search', async (req, res) => {
   }
 
   switch (sorting) {
+    case "viimeisin":
+      sortingMongo = '-date'
+      break;
     case "vanhin":
       sortingMongo = 'date'
       break;
@@ -212,13 +220,13 @@ app.get('/search', async (req, res) => {
     case "suurin":
       sortingMongo = '-meta.size'
       break;
-  
+
     default:
-      sortingMongo = '-date'
+      sortingMongo = { score : { $meta : 'textScore' } }
       break;
   }
 
-  Paste.find(search)
+  Paste.find(search, { score : { $meta: "textScore" } })
     .sort(sortingMongo)
     .skip(skip)
     .limit(limit)
@@ -236,6 +244,8 @@ app.get('/search', async (req, res) => {
 })
 
 app.get('/p/:id', (req, res) => {
+  // Show other similar pastes under the paste
+
   Paste.findOne({ id: req.params.id }).exec(async (err, paste) => {
     if (err) throw err
     await Paste.findOneAndUpdate({ id: req.params.id }, {$inc : {'meta.views' : 1}})
