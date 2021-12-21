@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const session = require('express-session')
+const url = require('url');
 
 const { Schema } = mongoose;
 const app = express()
@@ -107,6 +108,8 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dicta tempore ad amet 
 
 app.set('view engine', 'ejs')
 
+app.use(express.static('public'))
+
 app.get('/', (req, res) => {
     res.render('pages/index')
 })
@@ -166,14 +169,40 @@ app.get('/popular', (req, res) => {
     })
 })
 
-app.get('/search', (req, res) => {
+app.get('/search', async (req, res) => {
   // Use later full text indexes...
 
   let query = req.query.q
-  let page = req.query.page
-  let skip = page ? page : 0 * 10
+  let page = !(+req.query.page > 0) ? 1 : +req.query.page || 1
+  let skip = (page-1) * 10
   let limit = skip + 10
-  Paste.find({ title: { "$regex": query, "$options": "i" }, hidden: false })
+  let search = { title: { "$regex": query, "$options": "i" }, hidden: false }
+
+  let foundCount = await Paste.countDocuments(search).exec();
+
+  let pagination = {}
+
+  let currentPage = new URL(req.protocol + '://' + req.get('host') + req.originalUrl)
+  
+  currentPage.searchParams.set('page', page-1)
+  pagination.lastPage = currentPage.pathname + currentPage.search
+  currentPage.searchParams.set('page', page+1)
+  pagination.nextPage = currentPage.pathname + currentPage.search
+
+  pagination.links = []
+
+  for (let index = page-3; index < page+4; index++) {
+    if (index > 0) {
+      let linkPage = new URL(req.protocol + '://' + req.get('host') + req.originalUrl)
+      linkPage.searchParams.set('page', index)
+      pagination.links.push({
+        page: index,
+        link: linkPage.pathname + linkPage.search
+      })
+    }
+  }
+
+  Paste.find(search)
     .sort('date')
     .skip(skip)
     .limit(limit)
@@ -181,7 +210,10 @@ app.get('/search', (req, res) => {
       if (err) throw err
       res.render('pages/list', {
         pastes,
-        title: ""
+        title: `Hakutulokset haulle: ${query}`,
+        foundCount,
+        page,
+        pagination
       })
   })
 })
