@@ -10,6 +10,15 @@
 
   <!-- Line number plugin for higlight.js -->
   <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+
+  <!-- Theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs-themes@1.0.0/agate.css">
+
+  <style>
+    .hljs {
+      background-color: #3d4451
+    }
+  </style>
 </head>
 <body class="container max-w-full">
 
@@ -30,13 +39,16 @@
         <span class="p-1 bg-gray-500 text-white"><%= paste.hidden ? "piilotettu" : "" %></span>
       </div>
       <hr>
-      <pre class="whitespace-pre-wrap mt-5 p-4"><%= paste.content %></pre>
+      <div class="mockup-code">
+        <pre><code><%= paste.content %></code></pre>
+      </div>
     </div>
   </main>
 
+
   <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-      document.querySelectorAll('pre').forEach((el) => {
+      document.querySelectorAll('code').forEach((el) => {
         hljs.highlightElement(el);
 
         console.log(`Detected language as ${el.result.language} with relevance ${el.result.relevance}`)
