@@ -86,7 +86,6 @@ const UserSchema = new Schema({
 PasteSchema.index({
   title: 'text',
   content: 'text', 
-  id: 'text'
 });
 
 const Paste = mongoose.model('Paste', PasteSchema);
@@ -177,7 +176,7 @@ app.get('/search', async (req, res) => {
   let skip = (page-1) * 10
   let limit = skip + 10
   let sorting = (req.query.sorting && ["viimeisin", "vanhin", "suurin", "suosituin"].includes(req.query.sorting)) ? req.query.sorting : "viimeisin"
-  let search = { title: { "$regex": query, "$options": "i" }, hidden: false }
+  let search = { hidden: false, $text: { $search: query } }
 
   let foundCount = await Paste.countDocuments(search).exec();
 
