@@ -219,8 +219,6 @@ app.get('/search', async (req, res) => {
       break;
   }
 
-  console.log(sortingMongo)
-
   Paste.find(search)
     .sort(sortingMongo)
     .skip(skip)
