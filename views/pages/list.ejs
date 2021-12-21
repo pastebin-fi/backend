@@ -4,6 +4,16 @@ size)}...` : input; %>
 <html lang="en">
   <head>
     <%- include('../partials/head'); %>
+
+    <script>
+      const sortPastes = (order) => {
+        let url = new URL(window.location.href)
+        let params = new URLSearchParams(url.search);
+        params.set('sorting', order)
+        url.search = params.toString()
+        window.location.href = url
+      }
+    </script>
   </head>
   <body class="container max-w-full max-h-screen">
     <%- include('../partials/header'); %>
@@ -12,27 +22,62 @@ size)}...` : input; %>
       <br />
       <h1 class="mb-8 text-3xl"><%= title %></h1>
 
-      <p>Liitteitä löytyi: <%= foundCount %></p>
-      
+      <p>Liitteitä löytyi: <kbd><%= foundCount %></kbd></p>
+
+      <form action="/search" method="get">
+        <input type="hidden" name="title" />
+        <input type="hidden" name="page" page="<%= page %>" />
+
+        <div class="float-right dropdown dropdown-end">
+          <div tabindex="0" class="m-1 btn">Lajittelu (<%= sorting %>)</div>
+          <ul
+            tabindex="0"
+            class="
+              p-2
+              shadow
+              menu
+              dropdown-content
+              bg-base-100
+              rounded-box
+              w-52
+            "
+          >
+            <!-- remove js and use ejs -->
+            <li>
+              <a onclick="sortPastes('viimeisin')">Viimeisin</a>
+            </li>
+            <li>
+              <a onclick="sortPastes('vanhin')">Vanhin</a>
+            </li>
+            <li>
+              <a onclick="sortPastes('suosituin')">Suosituin</a>
+            </li>
+            <li>
+              <a onclick="sortPastes('suurin')">Suurin</a>
+            </li>
+          </ul>
+        </div>
+      </form>
 
       <div class="btn-group">
         <% if (page > 1) { %>
-          <a href="<%= pagination.lastPage %>" class="btn">Edellinen</a>
-        <% } %>
-        <% for (let key in pagination.links) { %>
-          <% if (pagination.links[key].page*10 < foundCount+10) { %>
-            <% if (pagination.links[key].page == page) { %>
-              <a href="<%= pagination.links[key].link %>" class="btn btn-active"><%= pagination.links[key].page %></a>
-            <% } else { %>
-              <a href="<%= pagination.links[key].link %>" class="btn"><%= pagination.links[key].page %></a>
-            <% } %>
-          <% } %>
-        <% } %>
-        <% if ((page*10)+10 < foundCount) { %>
-          <a href="<%= pagination.nextPage %>" class="btn">Seuraava</a>
+        <a href="<%= pagination.lastPage %>" class="btn">Edellinen</a>
+        <% } %> <% for (let key in pagination.links) { %> <% if
+        (pagination.links[key].page*10 < foundCount+10) { %> <% if
+        (pagination.links[key].page == page) { %>
+        <a href="<%= pagination.links[key].link %>" class="btn btn-active"
+          ><%= pagination.links[key].page %></a
+        >
+        <% } else { %>
+        <a href="<%= pagination.links[key].link %>" class="btn"
+          ><%= pagination.links[key].page %></a
+        >
+        <% } %> <% } %> <% } %> <% if ((page*10)+10 < foundCount) { %>
+        <a href="<%= pagination.nextPage %>" class="btn">Seuraava</a>
         <% } %>
       </div>
 
+      <br />
 
       <% for (let i=0; i < pastes.length; i++) { %>
 
@@ -53,25 +98,24 @@ size)}...` : input; %>
       <br />
       <% } %>
 
-
       <div class="btn-group">
         <% if (page > 1) { %>
-          <a href="<%= pagination.lastPage %>" class="btn">Edellinen</a>
-        <% } %>
-        <% for (let key in pagination.links) { %>
-          <% if (pagination.links[key].page*10 < foundCount+10) { %>
-            <% if (pagination.links[key].page == page) { %>
-              <a href="<%= pagination.links[key].link %>" class="btn btn-active"><%= pagination.links[key].page %></a>
-            <% } else { %>
-              <a href="<%= pagination.links[key].link %>" class="btn"><%= pagination.links[key].page %></a>
-            <% } %>
-          <% } %>
-        <% } %>
-        <% if ((page*10)+10 < foundCount) { %>
-          <a href="<%= pagination.nextPage %>" class="btn">Seuraava</a>
+        <a href="<%= pagination.lastPage %>" class="btn">Edellinen</a>
+        <% } %> <% for (let key in pagination.links) { %> <% if
+        (pagination.links[key].page*10 < foundCount+10) { %> <% if
+        (pagination.links[key].page == page) { %>
+        <a href="<%= pagination.links[key].link %>" class="btn btn-active"
+          ><%= pagination.links[key].page %></a
+        >
+        <% } else { %>
+        <a href="<%= pagination.links[key].link %>" class="btn"
+          ><%= pagination.links[key].page %></a
+        >
+        <% } %> <% } %> <% } %> <% if ((page*10)+10 < foundCount) { %>
+        <a href="<%= pagination.nextPage %>" class="btn">Seuraava</a>
         <% } %>
       </div>
-      <br>
+      <br />
     </main>
   </body>
 </html>

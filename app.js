@@ -172,10 +172,11 @@ app.get('/popular', (req, res) => {
 app.get('/search', async (req, res) => {
   // Use later full text indexes...
 
-  let query = req.query.q
+  let query = req.query.q || ""
   let page = !(+req.query.page > 0) ? 1 : +req.query.page || 1
   let skip = (page-1) * 10
   let limit = skip + 10
+  let sorting = (req.query.sorting && ["viimeisin", "vanhin", "suurin", "suosituin"].includes(req.query.sorting)) ? req.query.sorting : "viimeisin"
   let search = { title: { "$regex": query, "$options": "i" }, hidden: false }
 
   let foundCount = await Paste.countDocuments(search).exec();
@@ -202,8 +203,26 @@ app.get('/search', async (req, res) => {
     }
   }
 
+  switch (sorting) {
+    case "vanhin":
+      sortingMongo = 'date'
+      break;
+    case "suosituin":
+      sortingMongo = '-meta.views'
+      break;
+    case "suurin":
+      sortingMongo = '-meta.size'
+      break;
+  
+    default:
+      sortingMongo = '-date'
+      break;
+  }
+
+  console.log(sortingMongo)
+
   Paste.find(search)
-    .sort('date')
+    .sort(sortingMongo)
     .skip(skip)
     .limit(limit)
     .exec((err, pastes) => {
@@ -213,7 +232,8 @@ app.get('/search', async (req, res) => {
         title: `Hakutulokset haulle: ${query}`,
         foundCount,
         page,
-        pagination
+        pagination,
+        sorting
       })
   })
 })
