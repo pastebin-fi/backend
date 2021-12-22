@@ -101,23 +101,25 @@ size)}...` : input; %>
       <br />
       <% } %>
 
-      <div class="btn-group">
-        <% if (page > 1) { %>
-        <a href="<%= pagination.lastPage %>" class="btn">Edellinen</a>
-        <% } %> <% for (let key in pagination.links) { %> <% if
-        (pagination.links[key].page*10 < foundCount+10) { %> <% if
-        (pagination.links[key].page == page) { %>
-        <a href="<%= pagination.links[key].link %>" class="btn btn-active"
-          ><%= pagination.links[key].page %></a
-        >
-        <% } else { %>
-        <a href="<%= pagination.links[key].link %>" class="btn"
-          ><%= pagination.links[key].page %></a
-        >
-        <% } %> <% } %> <% } %> <% if ((page*10)+10 < foundCount) { %>
-        <a href="<%= pagination.nextPage %>" class="btn">Seuraava</a>
-        <% } %>
-      </div>
+      <% if (founcdCount > 10) { %>
+        <div class="btn-group">
+          <% if (page > 1) { %>
+          <a href="<%= pagination.lastPage %>" class="btn">Edellinen</a>
+          <% } %> <% for (let key in pagination.links) { %> <% if
+          (pagination.links[key].page*10 < foundCount+10) { %> <% if
+          (pagination.links[key].page == page) { %>
+          <a href="<%= pagination.links[key].link %>" class="btn btn-active"
+            ><%= pagination.links[key].page %></a
+          >
+          <% } else { %>
+          <a href="<%= pagination.links[key].link %>" class="btn"
+            ><%= pagination.links[key].page %></a
+          >
+          <% } %> <% } %> <% } %> <% if ((page*10)+10 < foundCount) { %>
+          <a href="<%= pagination.nextPage %>" class="btn">Seuraava</a>
+          <% } %>
+        </div>
+      <% } %>
       <br />
     </main>
   </body>
