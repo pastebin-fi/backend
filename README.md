@@ -30,16 +30,11 @@ Write later...
 
 ## Environment variables
 
-| Key         | Description                                                                                                                                                                        |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Key         | Description      |
+| ----------- | ---------------- |
 | MONGO_URI   | Example: `mongodb+srv://user:pass@host/database`. This is the URI that MongoDB tries to connect to. It should be in format `mongodb+src://<user>:<password>@<hostname>/<database>` |
-| ---------   | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SITE_URL    | Example: `http://localhost:3000`. The app parser required info from it.                                                                                                            |
-| ---------   | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TITLE       | Defines the site title.                                                                                                                                                            |
-| ---------   | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DESCRIPTION | Describe your pastebin. Visible in some places.                                                                                                                                    |
-| ---------   | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TRUST_PROXY | Number of proxies to trust (handy when using reverse proxy).                                                                                                                       |
-| ---------   | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SECRET      | Should be something random and unique.                                                                                                                                             |
+| SITE_URL    | Example: `http://localhost:3000`. The app parser required info from it. |
+| TITLE       | Defines the site title. 
+| DESCRIPTION | Describe your pastebin. Visible in some places. |
+| TRUST_PROXY | Number of proxies to trust (handy when using reverse proxy). |
+| SECRET      | Should be something random and unique. |
