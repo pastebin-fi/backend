@@ -1,12 +1,10 @@
 const mongoose = require('mongoose');
 
-const { makeid } = require('./helpers');
-
 const { Schema } = mongoose;
 
 exports.PasteSchema = new Schema({
     title: String,
-    id: { type: String, default: makeid(12) },
+    id: String,
     author: String,
     ip: String,
     content: String,

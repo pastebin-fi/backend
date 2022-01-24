@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 
+const paste = require('./routes/paste');
 const sitemap = require('./routes/sitemap');
 
 const app = express();
