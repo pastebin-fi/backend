@@ -1,3 +1,5 @@
+const Paste = require('./paste').Paste;
+
 exports.get = (req, res) => {
     Paste.find().exec((err, pastes) => {
         if (err) throw err

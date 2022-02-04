@@ -6,6 +6,7 @@ const schemas = require('../schemas');
 mongoose.connect(process.env.MONGO_URI);
 
 const Paste = mongoose.model('Paste', schemas.PasteSchema);
+exports.Paste = Paste;
 
 exports.new = (req, res) => {
     if (req.body.paste === "") {
@@ -15,7 +16,7 @@ exports.new = (req, res) => {
     const paste = {
         title: req.body.title,
         author: null,
-        id:  makeid(12),
+        id: makeid(12),
         ip: process.env.TRUST_PROXY > 0 ? req.headers['x-forwarded-for'] : req.socket.remoteAddress.replace(/^.*:/, ''),
         content: req.body.paste,
         hidden: req.body.hidden === "on" ? true : false,
