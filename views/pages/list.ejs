@@ -4,63 +4,36 @@ size)}...` : input; %>
 <html lang="en">
   <head>
     <%- include('../partials/head'); %>
-
-    <script>
-      const sortPastes = (order) => {
-        let url = new URL(window.location.href)
-        let params = new URLSearchParams(url.search);
-        params.set('sorting', order)
-        url.search = params.toString()
-        window.location.href = url
-      }
-    </script>
   </head>
-  <body class="container max-w-full max-h-screen">
+  <body class="container">
     <%- include('../partials/header'); %>
 
-    <main class="ml-16 mr-16">
+    <main>
       <br />
-      <h1 class="mb-8 text-3xl"><%= title %></h1>
-
       <p>Liitteitä löytyi: <kbd><%= foundCount %></kbd></p>
 
-      <form action="/search" method="get">
-        <input type="hidden" name="title" />
-        <input type="hidden" name="page" page="<%= page %>" />
-
-        <div class="float-right dropdown dropdown-end">
-          <div tabindex="0" class="m-1 btn">Lajittelu (<%= sorting %>)</div>
-          <ul
-            tabindex="0"
-            class="
-              p-2
-              shadow
-              menu
-              dropdown-content
-              bg-base-100
-              rounded-box
-              w-52
-            "
-          >
-            <!-- remove js and use ejs -->
-            <li>
-              <a onclick="sortPastes('olennaisin')">Olennaisin</a>
-            </li>
-            <li>
-              <a onclick="sortPastes('viimeisin')">Viimeisin</a>
-            </li>
-            <li>
-              <a onclick="sortPastes('vanhin')">Vanhin</a>
-            </li>
-            <li>
-              <a onclick="sortPastes('suosituin')">Suosituin</a>
-            </li>
-            <li>
-              <a onclick="sortPastes('suurin')">Suurin</a>
-            </li>
-          </ul>
-        </div>
+      <form action="/search">
+        <fieldset>
+          <legend>Hakusivu</legend>
+          <div class="form-group">
+            <label for="query">Liitteen nimi / hakusana:</label>
+            <input id="query" name="q" type="text" placeholder="Liite...">
+          </div>
+          <div class="form-group">
+            <label for="sorting">Lajittelu:</label>
+            <select id="sorting" name="sorting">
+              <option value="olennaisin">Olennaisin ensin</option>
+              <option value="viimeisin">Uusin ensin</option>
+              <option value="suosituin">Suosituin ensin</option>
+              <option value="suurin">Suurin ensin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-default" type="submit" role="button" id="search">Hae!</button>
+          </div>
+        </fieldset>
       </form>
+
 
       <% if (foundCount > 10) { %>
         <div class="btn-group">
@@ -85,21 +58,15 @@ size)}...` : input; %>
       <br />
 
       <% for (let i=0; i < pastes.length; i++) { %>
-
-      <div class="card shadow-lg">
-        <div class="card-body">
-          <h2 class="card-title">
-            <a class="hover:underline break-words" href="/p/<%= pastes[i].id %>"
-              ><%= pastes[i].title ? truncate(pastes[i].title, 50) : "Nimetön"
-              %></a
-            >
-          </h2>
-          <p class="mt-5 break-words">
-            <%= pastes[i].content ? truncate(pastes[i].content, 500) : "Tyhjyys"
-            %>
-          </p>
+        <div class="terminal-card">
+          <header><%= pastes[i].title ? truncate(pastes[i].title, 50) : "Nimetön" %></header>
+          <div>
+            <%= pastes[i].content ? truncate(pastes[i].content, 500) : "Tyhjyys" %>
+            <br>
+            <br>
+            <a href="/p/<%= pastes[i].id %>">Katso kokonaan...</a>
+          </div>
         </div>
-      </div>
       <br />
       <% } %>
 
