@@ -68,6 +68,8 @@ app.post('/new', paste.new)
 
 app.get('/search', paste.search);
 
+app.get('/popular', paste.popular);
+
 app.get('/p/:id', paste.get);
 
 app.get('/r/:id', paste.raw);

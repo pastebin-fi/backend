@@ -129,13 +129,25 @@ exports.search = async(req, res) => {
         .limit(limit)
         .exec((err, pastes) => {
             if (err) throw err
-            res.render('pages/list', {
+            res.render('pages/search', {
                 pastes,
                 title: `Hakutulokset haulle: ${query}`,
                 foundCount,
                 page,
                 pagination,
                 sorting
+            });
+        });
+};
+
+exports.popular = (req, res) => {
+    Paste.find({ hidden: false })
+        .sort('-meta.views')
+        .limit(200)
+        .exec((err, pastes) => {
+            if (err) throw err
+            res.render('pages/popular', {
+                pastes
             });
         });
 };

@@ -1,0 +1,54 @@
+<% const truncate = (input, size) => input.length > size ? `${input.substring(0,
+    size)}...` : input; %>
+
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <%- include('../partials/head'); %>
+    </head>
+
+    <body class="max-w-full">
+        <%- include('../partials/header'); %>
+
+            <main class="container">
+                <h2>Suosituimmat liitteet</h2>
+
+                <table>
+                    <caption>
+                        200 katsotuinta liitettä
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Sija</th>
+                            <th>Nimi</th>
+                            <th>Katselukerrat</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">pastebin.fi</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <% pastes.forEach((paste, idx) => { %>
+                            <tr>
+                                <th>
+                                    <%= idx+1 %>
+                                </th>
+                                <td>
+                                    <a href="/p/<%= paste.id %>">
+                                        <%= paste.title ? truncate(paste.title, 200) : "Nimetön" %>
+                                    </a>
+                                </td>
+                                <td>
+                                    <%= paste.meta.views %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+            </main>
+    </body>
+
+    </html>
