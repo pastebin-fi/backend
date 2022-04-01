@@ -30,6 +30,7 @@ exports.new = (req, res) => {
 
     Paste.create(paste, (err, paste) => {
         if (err) throw err;
+        console.log(`${Date.now().toString()} - New paste created with id ${paste.id}`);
         res.redirect('/p/' + paste.id);
     });
 };
@@ -44,6 +45,8 @@ exports.get = (req, res) => {
             paste.meta.size = Buffer.byteLength(paste.content, 'utf8');
             await Paste.findOneAndUpdate({ id: req.params.id }, { $inc: { 'meta.size': paste.meta.size } });
         }
+
+        console.log(`${Date.now().toString()} - Paste viewed with id ${paste.id}`);
 
         res.render('pages/paste', {
             paste
