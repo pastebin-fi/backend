@@ -154,3 +154,14 @@ exports.popular = (req, res) => {
             });
         });
 };
+
+exports.archive = (req, res) => {
+    Paste.find({ hidden: false })
+        .sort('-date')
+        .exec((err, pastes) => {
+            if (err) throw err
+            res.render('pages/archive', {
+                pastes
+            });
+        });
+}
