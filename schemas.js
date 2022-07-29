@@ -5,11 +5,8 @@ const { Schema } = mongoose;
 exports.PasteSchema = new Schema({
     title: String,
     id: String,
-    author: String,
+    author: { type: String, default: "Anonymous" },
     ip: String,
-    keywords: [
-        String
-    ],
     expiration: {
         type: Date,
     },
@@ -27,7 +24,7 @@ exports.PasteSchema = new Schema({
         size: Number,
     },
     removed: { 
-        status: {type: Boolean, default: false},
+        isRemoved: {type: Boolean, default: false},
         reason: {type: String, default: ""}
     },
 });

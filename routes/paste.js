@@ -114,20 +114,29 @@ exports.new = async (req, res) => {
 // Rajoita näkyviin vain tietyt valitut tiedot
 exports.get = (req, res) => {
     // Show other similar pastes under the paste
+    const requestedId = req.params.id;
 
-    Paste.findOne({ id: req.params.id }).exec(async(err, paste) => {
+    Paste.findOne({ id: requestedId }).exec(async(err, paste) => {
         if (err) throw err
-        await Paste.findOneAndUpdate({ id: req.params.id }, { $inc: { 'meta.views': 1 } });
+        await Paste.findOneAndUpdate({ id: requestedId }, { $inc: { 'meta.views': 1 } });
+        
         if (!paste.meta.size) {
             paste.meta.size = Buffer.byteLength(paste.content, 'utf8');
-            await Paste.findOneAndUpdate({ id: req.params.id }, { $inc: { 'meta.size': paste.meta.size } });
+            await Paste.findOneAndUpdate({ id: requestedId }, { $inc: { 'meta.size': paste.meta.size } });
         }
+
+        if (paste.removed.isRemoved) {
+            res.send(paste.removed);
+        }
+
+        // Filter out unwanted data (ip address, removal and so on...)
+        allowedKeys = [ 'id', 'content', 'meta', 'allowedreads', 'date', 'author' ];
+        let visiblePaste = JSON.parse(JSON.stringify(paste)) // https://stackoverflow.com/questions/9952649/convert-mongoose-docs-to-json
+        Object.keys(visiblePaste).forEach((key) => allowedKeys.includes(key) || delete visiblePaste[key]);
 
         console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
 
-        res.send({
-            "paste": paste
-        });
+        res.send(visiblePaste);
     });
 };
 
