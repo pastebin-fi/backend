@@ -7,7 +7,17 @@ exports.PasteSchema = new Schema({
     id: String,
     author: String,
     ip: String,
+    keywords: [
+        String
+    ],
+    expiration: {
+        type: Date,
+    },
+    allowedreads: { type: Number, default: 0 }, // 0 disables
+    sha256: String,
+    deletekey: String,
     content: String,
+    language: String,
     date: { type: Date, default: Date.now },
     hidden: Boolean,
     meta: {
@@ -15,7 +25,11 @@ exports.PasteSchema = new Schema({
         favs: Number,
         views: Number,
         size: Number,
-    }
+    },
+    removed: { 
+        status: {type: Boolean, default: false},
+        reason: {type: String, default: ""}
+    },
 });
 
 exports.UserSchema = new Schema({
@@ -33,6 +47,12 @@ exports.UserSchema = new Schema({
         followCount: Number,
     },
     followed: [String],
+    favorites: [String],
+    roles: [String],
+    banned: { 
+        status: {type: Boolean, default: false},
+        reason: {type: String, default: ""}
+    },
 })
 
 this.PasteSchema.index({

@@ -4,6 +4,7 @@ const session = require('express-session');
 
 const paste = require('./routes/paste');
 const sitemap = require('./routes/sitemap');
+const metrics = require('./routes/metrics');
 
 const app = express();
 
@@ -14,7 +15,6 @@ const urlMatch = urlRegex.exec(process.env.SITE_URL);
 const protocol = urlMatch.groups.protocol ? urlMatch.groups.protocol : "http";
 const hostname = urlMatch.groups.hostname ? urlMatch.groups.hostname : "localhost";
 const port = urlMatch.groups.port ? urlMatch.groups.port : 3000;
-
 
 let sess = {
     secret: process.env.SECRET,
@@ -54,32 +54,36 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dicta tempore ad amet 
 
 app.set('view engine', 'ejs');
 
-app.use(express.static('public'));
-
 app.get('/', (req, res) => {
     res.render('pages/index');
 });
 
-app.get('/new', (req, res) => {
-    res.render('pages/index');
-});
-
-app.post('/new', paste.new)
-
-app.get('/search', paste.search);
-
-app.get('/popular', paste.popular);
-
-app.get('/archive', paste.archive);
-
-app.get('/p/:id', paste.get);
-
-app.get('/r/:id', paste.raw);
-
-app.get('/dl/:id', paste.download);
+// Implement also user metrics
+app.get('/metrics', metrics.get);
 
 app.get('/sitemap.xml', sitemap.get);
 
+// PASTES
+app.post('/pastes', paste.new);
+
+app.get('/pastes/:id', paste.get); // Might be wise to move into /pastes?id=xyz
+
+// app.delete('/pastes', paste.delete);
+
+// Contains different filterings: latest, greatest, search text in title
+// app.get('/pastes', paste.filter);
+
+// USERS
+// Not yet implemented
+// app.post('/auth', user.auth)
+
+// app.post('/users', user.new)
+
+// app.get('/users/:id', user.get);
+
+// app.get('/users', users.filter);
+
+
 app.listen(port, () => {
-    console.log(`PowerPaste app listening at ${protocol}://${hostname}:${port}`);
+    console.log(`pastebin.fi API listening at ${protocol}://${hostname}:${port}`);
 });

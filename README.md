@@ -1,18 +1,15 @@
-# PowerPaste
-Best pastebin software ever
+# pastebin.fi API
+This is the API for [pastebin.fi](https://pastebin.fi). The frontend can be found here: 
 
 ## Stack
 
 ### Backend
 
 - Node.JS (version 16)
-- EJS
 - MongoDB (mongoose)
+- S3
 
-### Frontend
-
-- Tailwind (daisyUI)
-- CodeMirror (the text editor)
+The server stores paste content to S3 bucket and other relevant information to MongoDB. 
 
 ## Setup
 
@@ -38,3 +35,5 @@ Write later...
 | DESCRIPTION | Describe your pastebin. Visible in some places. |
 | TRUST_PROXY | Number of proxies to trust (handy when using reverse proxy). |
 | SECRET      | Should be something random and unique. |
+
+## REST API Documentation
