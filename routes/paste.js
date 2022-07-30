@@ -134,28 +134,18 @@ exports.get = (req, res) => {
         let visiblePaste = JSON.parse(JSON.stringify(paste)) // https://stackoverflow.com/questions/9952649/convert-mongoose-docs-to-json
         Object.keys(visiblePaste).forEach((key) => allowedKeys.includes(key) || delete visiblePaste[key]);
 
-        console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
+        s3.getObject({
+            Bucket: bucket,
+            Key: paste.sha256
+        }, (err, data) => {
+            if (err) console.log(err);
 
-        res.send(visiblePaste);
-    });
-};
+            visiblePaste.content = data.Body.toString('utf-8');
 
-exports.raw = (req, res) => {
-    Paste.findOne({ id: req.params.id }).exec(async(err, paste) => {
-        if (err) throw err
-        await Paste.findOneAndUpdate({ id: req.params.id }, { $inc: { 'meta.views': 1 } });
-        res.set('Content-Type', 'text/plain');
-        res.send(paste.content);
-    });
-};
-
-exports.download = (req, res) => {
-    Paste.findOne({ id: req.params.id }).exec(async(err, paste) => {
-        if (err) throw err
-        await Paste.findOneAndUpdate({ id: req.params.id }, { $inc: { 'meta.views': 1 } });
-        res.status(200)
-            .attachment(`${paste.title}.txt`)
-            .send(paste.content);
+            console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
+    
+            res.send(visiblePaste);
+        });
     });
 };
 
