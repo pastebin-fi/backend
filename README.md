@@ -7,9 +7,9 @@ This is the API for [pastebin.fi](https://pastebin.fi). The frontend can be foun
 
 - Node.JS (version 16)
 - MongoDB (mongoose)
-- S3
+- Local File System (paste storage)
 
-The server stores paste content to S3 bucket and other relevant information to MongoDB. 
+The server stores paste content to local file system and other relevant information to MongoDB. I was considering to use S3 but at Wasabi it had some hiccups from time to time (requests did not finish).
 
 ## Setup
 

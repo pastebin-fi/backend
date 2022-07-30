@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const sha256 = require('js-sha256').sha256;
-const S3 = require('aws-sdk/clients/s3');
-const AWS = require('aws-sdk');
+const findInFiles = require('find-in-files');
+const fs = require('fs/promises');
 
 const { makeid, checkReputation } = require('../helpers');
 const schemas = require('../schemas');
@@ -12,21 +12,7 @@ const Paste = mongoose.model('Paste', schemas.PasteSchema);
 exports.Paste = Paste;
 
 const abuseipdbKey = process.env.ABUSEIPDB_KEY
-
-const accessKeyId = process.env.S3_ACCESS_KEY
-const secretAccessKey = process.env.S3_SECRET_KEY
-const region = process.env.S3_REGION
-const serviceUrl = process.env.S3_SERVICE_URL
-const bucket = process.env.S3_BUCKET
-
-const wasabiEndpoint = new AWS.Endpoint(serviceUrl);
-
-const s3 = new S3({
-  endpoint: wasabiEndpoint,
-  region: region,
-  accessKeyId,
-  secretAccessKey
-});
+const dataDir = process.env.DATA_DIR
 
 exports.new = async (req, res) => {
     if (req.body.paste === "") {
@@ -94,13 +80,7 @@ exports.new = async (req, res) => {
         },
     };
 
-    s3.putObject({
-        Body: content,
-        Bucket: bucket,
-        Key: hash
-    }, (err, data) => {
-        if (err) console.log(err)
-    });
+    await fs.writeFile(`${dataDir}/${hash}`, content);
 
     Paste.create(paste, (err, paste) => {
         if (err) throw err;
@@ -134,18 +114,10 @@ exports.get = (req, res) => {
         let visiblePaste = JSON.parse(JSON.stringify(paste)) // https://stackoverflow.com/questions/9952649/convert-mongoose-docs-to-json
         Object.keys(visiblePaste).forEach((key) => allowedKeys.includes(key) || delete visiblePaste[key]);
 
-        s3.getObject({
-            Bucket: bucket,
-            Key: paste.sha256
-        }, (err, data) => {
-            if (err) console.log(err);
-
-            visiblePaste.content = data.Body.toString('utf-8');
-
-            console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
-    
-            res.send(visiblePaste);
-        });
+        const content = await fs.readFile(`${dataDir}/${paste.sha256}`)
+        visiblePaste.content = content.toString()
+        console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
+        res.send(visiblePaste);
     });
 };
 
