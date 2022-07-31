@@ -157,8 +157,6 @@ exports.filter = async(req, res) => {
         search.$text = { $search: title }
     }
 
-    console.log(sorting)
-
     Paste.find(search, score)
         .sort(sorting)
         .skip(offset)
@@ -167,28 +165,5 @@ exports.filter = async(req, res) => {
         .exec((err, pastes) => {
             if (err) console.error(err)
             res.send(pastes)
-        })    
+        })
 };
-
-exports.popular = (req, res) => {
-    Paste.find({ hidden: false })
-        .sort('-meta.views')
-        .limit(200)
-        .exec((err, pastes) => {
-            if (err) throw err
-            res.render('pages/popular', {
-                pastes
-            });
-        });
-};
-
-exports.archive = (req, res) => {
-    Paste.find({ hidden: false })
-        .sort('-date')
-        .exec((err, pastes) => {
-            if (err) throw err
-            res.render('pages/archive', {
-                pastes
-            });
-        });
-}
