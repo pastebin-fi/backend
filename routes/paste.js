@@ -69,7 +69,7 @@ exports.new = async (req, res) => {
         author: null,
         id: makeid(7),
         ip: ip,
-        hidden: req.body.hidden === "on" ? true : false,
+        hidden: req.body.hidden == "true" ? true : false,
         sha256: hash,
         deletekey: makeid(64),
         meta: {
@@ -91,7 +91,6 @@ exports.new = async (req, res) => {
     });
 };
 
-// Rajoita näkyviin vain tietyt valitut tiedot
 exports.get = (req, res) => {
     // Show other similar pastes under the paste
     const requestedId = req.params.id;
@@ -142,7 +141,30 @@ exports.filter = async(req, res) => {
     // Do not allow too many pastes
     limit = limit > 30 ? 30 : limit;
 
+    // If it is content search ignore almost every other thing
     if (content) {
+        let results = await findInFiles.findSync(content, dataDir, '')
+
+        let hashes = []
+
+        for (const filePath in results) {
+            let info = results[filePath];
+            const hash = filePath.replace(dataDir.replace(/[^a-z0-9]/gi,''), '').replace(/[^a-z0-9]/gi,'')
+            console.log(hash)
+            hashes.push(hash)
+        }
+
+        console.log(hashes)
+
+        // Important to not search in non hidden files (filter them out)
+        let visiblePastes = await Paste.find({ hidden: false })
+            .select('id meta allowedreads date author -_id')
+            .where('sha256')
+            .in(hashes)
+            .exec();
+
+        res.send(visiblePastes)
+        
         return;
     }
 
