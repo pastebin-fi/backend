@@ -114,81 +114,60 @@ exports.get = (req, res) => {
         let visiblePaste = JSON.parse(JSON.stringify(paste)) // https://stackoverflow.com/questions/9952649/convert-mongoose-docs-to-json
         Object.keys(visiblePaste).forEach((key) => allowedKeys.includes(key) || delete visiblePaste[key]);
 
-        const content = await fs.readFile(`${dataDir}/${paste.sha256}`)
-        visiblePaste.content = content.toString()
-        console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
-        res.send(visiblePaste);
+        try {
+            const content = await fs.readFile(`${dataDir}/${paste.sha256}`)
+            visiblePaste.content = content.toString()
+            console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
+            res.send(visiblePaste);
+        } catch (error) {
+            res
+                .status(410)
+                .send({
+                    "error": "Liitteen data on kadonnut levyltä."
+                });
+        }
     });
 };
 
-exports.search = async(req, res) => {
+exports.filter = async(req, res) => {
     // Highlight the search result for client.
 
-    let query = req.query.q || "";
-    let page = !(+req.query.page > 0) ? 1 : +req.query.page || 1;
-    let skip = (page - 1) * 10;
-    let limit = skip + 10;
-    let sorting = (req.query.sorting && ["viimeisin", "vanhin", "suurin", "suosituin"].includes(req.query.sorting)) ? req.query.sorting : "olennaisin";
-    let search = { hidden: false, $text: { $search: query } };
+    // let limit 
+    let title = req.query.title || "";
+    let content = req.query.content || "";
+    let offset = req.query.offset || 0;
+    let limit = req.query.limit || 10;
+    let sorting = req.query.sorting || "-meta.views";
 
-    let foundCount = await Paste.countDocuments(search).exec();
+    // Do not allow too many pastes
+    limit = limit > 30 ? 30 : limit;
 
-    let pagination = {};
-
-    let currentPage = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
-
-    currentPage.searchParams.set('page', page - 1);
-    pagination.lastPage = currentPage.pathname + currentPage.search;
-    currentPage.searchParams.set('page', page + 1);
-    pagination.nextPage = currentPage.pathname + currentPage.search;
-
-    pagination.links = [];
-
-    for (let index = page - 3; index < page + 4; index++) {
-        if (index > 0) {
-            let linkPage = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
-            linkPage.searchParams.set('page', index);
-            pagination.links.push({
-                page: index,
-                link: linkPage.pathname + linkPage.search
-            });
-        }
+    if (content) {
+        return;
     }
 
-    switch (sorting) {
-        case "viimeisin":
-            sortingMongo = '-date'
-            break;
-        case "vanhin":
-            sortingMongo = 'date'
-            break;
-        case "suosituin":
-            sortingMongo = '-meta.views'
-            break;
-        case "suurin":
-            sortingMongo = '-meta.size'
-            break;
+    allowedSortings = ['-date', 'date', '-meta.views', 'meta.views', '-meta.size', 'meta.size', '-meta.votes', 'meta.votes', '-meta.favs', '-meta.favs']
+    if (!allowedSortings.includes(sorting))
+        sorting = '-meta.views'
 
-        default:
-            sortingMongo = { score: { $meta: 'textScore' } }
-            break;
+    let search = { hidden: false };
+    let score = {};
+    if (title) {
+        score = { score: { $meta: "textScore" } }
+        search.$text = { $search: title }
     }
 
-    Paste.find(search, { score: { $meta: "textScore" } })
-        .sort(sortingMongo)
-        .skip(skip)
+    console.log(sorting)
+
+    Paste.find(search, score)
+        .sort(sorting)
+        .skip(offset)
         .limit(limit)
+        .select('id title meta author date -_id')
         .exec((err, pastes) => {
-            if (err) throw err
-            res.render('pages/search', {
-                pastes,
-                title: `Hakutulokset haulle: ${query}`,
-                foundCount,
-                page,
-                pagination,
-                sorting
-            });
-        });
+            if (err) console.error(err)
+            res.send(pastes)
+        })    
 };
 
 exports.popular = (req, res) => {

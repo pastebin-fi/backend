@@ -53,12 +53,7 @@ exports.UserSchema = new Schema({
 })
 
 this.PasteSchema.index({
-    title: 'text',
-    content: 'text',
+    title: 'text'
 }, {
-    name: 'Search index',
-    weights: {
-        title: 10,
-        content: 6
-    }
+    name: 'Search index'
 });

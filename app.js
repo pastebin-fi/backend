@@ -114,7 +114,7 @@ app.get('/pastes/:id', paste.get); // Might be wise to move into /pastes?id=xyz
 // app.delete('/pastes', paste.delete);
 
 // Contains different filterings: latest, greatest, search text in title
-// app.get('/pastes', paste.filter);
+app.get('/pastes', paste.filter);
 
 // USERS
 // Not yet implemented
