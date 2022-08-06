@@ -14,7 +14,7 @@ exports.PasteSchema = new Schema({
     sha256: String,
     deletekey: String,
     content: String,
-    language: String,
+    programmingLanguage: String,
     date: { type: Date, default: Date.now },
     hidden: Boolean,
     meta: {
@@ -32,6 +32,10 @@ exports.PasteSchema = new Schema({
 exports.UserSchema = new Schema({
     name: String,
     pwHash: String,
+    pwSalt: String,
+    email: String,
+    activated: Boolean,
+    activationKey: String,
     ip: {
         last: String,
         all: [String]

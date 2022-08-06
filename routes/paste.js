@@ -39,6 +39,7 @@ exports.new = async (req, res) => {
     const content = req.body.paste
     const title = req.body.title
     const size = Buffer.byteLength(content, 'utf8')
+    const language = req.body.language ? req.body.language : 'html'
 
     if (size > 10_000_000) {
         res.status(413).send({
@@ -54,6 +55,13 @@ exports.new = async (req, res) => {
         return;
     }
 
+    if (title.length > 10) {
+        res.status(413).send({
+            "error": "Ohjelmointikielen nimi ei voi olla yli kymmentä merkkiä."
+        });
+        return;
+    }
+
     const hash = sha256(content)
     if (await Paste.exists({ sha256: hash })) {
         console.log("Liite samalla sisällöllä on jo olemassa")
@@ -64,14 +72,17 @@ exports.new = async (req, res) => {
         return;
     }
 
+    const deleteKey = makeid(64);
+
     const paste = {
         title: title,
         author: null,
         id: makeid(7),
         ip: ip,
-        hidden: req.body.hidden == "true" ? true : false,
+        hidden: req.body.private == true ? true : false,
+        programmingLanguage: language,
         sha256: hash,
-        deletekey: makeid(64),
+        deletekey: deleteKey,
         meta: {
             votes: null,
             favs: null,
@@ -86,7 +97,8 @@ exports.new = async (req, res) => {
         if (err) throw err;
         console.log(`${Date.now().toString()} - New paste created with id ${paste.id}`);
         res.send({
-            "id": paste.id
+            "id": paste.id,
+            "delete": deleteKey
         });
     });
 };
@@ -109,7 +121,7 @@ exports.get = (req, res) => {
         }
 
         // Filter out unwanted data (ip address, removal and so on...)
-        allowedKeys = [ 'id', 'content', 'meta', 'allowedreads', 'date', 'author' ];
+        allowedKeys = ['programmingLanguage', 'hidden', 'id', 'content', 'meta', 'allowedreads', 'date', 'author', 'title' ];
         let visiblePaste = JSON.parse(JSON.stringify(paste)) // https://stackoverflow.com/questions/9952649/convert-mongoose-docs-to-json
         Object.keys(visiblePaste).forEach((key) => allowedKeys.includes(key) || delete visiblePaste[key]);
 
@@ -119,11 +131,13 @@ exports.get = (req, res) => {
             console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
             res.send(visiblePaste);
         } catch (error) {
-            res
-                .status(410)
-                .send({
-                    "error": "Liitteen data on kadonnut levyltä."
-                });
+            visiblePaste.content = paste.content
+            res.send(visiblePaste)
+            // res
+            //     .status(410)
+            //     .send({
+            //         "error": "Liitteen data on kadonnut levyltä."
+            //     });
         }
     });
 };

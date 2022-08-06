@@ -14,7 +14,7 @@ const urlMatch = urlRegex.exec(process.env.SITE_URL);
 
 const protocol = urlMatch.groups.protocol ? urlMatch.groups.protocol : "http";
 const hostname = urlMatch.groups.hostname ? urlMatch.groups.hostname : "localhost";
-const port = urlMatch.groups.port ? urlMatch.groups.port : 3000;
+const port = urlMatch.groups.port ? urlMatch.groups.port : 3001;
 
 let sess = {
     secret: process.env.SECRET,
