@@ -109,6 +109,10 @@ exports.get = (req, res) => {
 
     Paste.findOne({ id: requestedId }).exec(async(err, paste) => {
         if (err) throw err
+
+        if (paste == null)
+            return res.status(404).send({"error": "Liitettä ei ole olemassa tai se on poistettu. "})
+
         await Paste.findOneAndUpdate({ id: requestedId }, { $inc: { 'meta.views': 1 } });
         
         if (!paste.meta.size) {
@@ -128,7 +132,7 @@ exports.get = (req, res) => {
         try {
             const content = await fs.readFile(`${dataDir}/${paste.sha256}`)
             visiblePaste.content = content.toString()
-            console.log(`${Date.now().toString()} - Paste requested with id ${paste.id}`);
+            console.log(`${(new Date).toLocaleString('fi-FI')} - Katsottu liite ${paste.id}`);
             res.send(visiblePaste);
         } catch (error) {
             visiblePaste.content = paste.content
@@ -172,7 +176,7 @@ exports.filter = async(req, res) => {
 
         // Important to not search in non hidden files (filter them out)
         let visiblePastes = await Paste.find({ hidden: false })
-            .select('id meta allowedreads date author -_id')
+            .select('id meta allowedreads date author programmingLanguage -_id')
             .where('sha256')
             .in(hashes)
             .exec();
