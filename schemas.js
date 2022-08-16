@@ -5,9 +5,16 @@ const { Schema } = mongoose;
 exports.PasteSchema = new Schema({
     title: String,
     id: String,
-    author: String,
+    author: { type: String, default: "Anonymous" },
     ip: String,
+    expiration: {
+        type: Date,
+    },
+    allowedreads: { type: Number, default: 0 }, // 0 disables
+    sha256: String,
+    deletekey: String,
     content: String,
+    programmingLanguage: String,
     date: { type: Date, default: Date.now },
     hidden: Boolean,
     meta: {
@@ -15,12 +22,20 @@ exports.PasteSchema = new Schema({
         favs: Number,
         views: Number,
         size: Number,
-    }
+    },
+    removed: { 
+        isRemoved: {type: Boolean, default: false},
+        reason: {type: String, default: ""}
+    },
 });
 
 exports.UserSchema = new Schema({
     name: String,
     pwHash: String,
+    pwSalt: String,
+    email: String,
+    activated: Boolean,
+    activationKey: String,
     ip: {
         last: String,
         all: [String]
@@ -33,15 +48,16 @@ exports.UserSchema = new Schema({
         followCount: Number,
     },
     followed: [String],
+    favorites: [String],
+    roles: [String],
+    banned: { 
+        status: {type: Boolean, default: false},
+        reason: {type: String, default: ""}
+    },
 })
 
 this.PasteSchema.index({
-    title: 'text',
-    content: 'text',
+    title: 'text'
 }, {
-    name: 'Search index',
-    weights: {
-        title: 10,
-        content: 6
-    }
+    name: 'Search index'
 });
