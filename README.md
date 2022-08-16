@@ -1,5 +1,5 @@
 # PowerPaste
-Best pastebin software ever
+Best pastebin API ever
 
 ## Stack
 
