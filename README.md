@@ -1,5 +1,5 @@
 # pastebin.fi API
-This is the API for [pastebin.fi](https://pastebin.fi). The frontend can be found here: 
+This is the API for [pastebin.fi](https://pastebin.fi). The frontend can be found here: [PastebinUI](https://github.com/pastebin-fi/PastebinUI)
 
 ## Stack
 
@@ -23,7 +23,7 @@ If you are developing something I would suggest to use nodemon (`npm i -g nodemo
 
 ### With Docker
 
-Write later...
+`docker-compose.prod.yml` contains an example configuration.
 
 ## Environment variables
 

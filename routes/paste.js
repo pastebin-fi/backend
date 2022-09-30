@@ -55,7 +55,7 @@ exports.new = async (req, res) => {
         return;
     }
 
-    if (title.length > 10) {
+    if (language.length > 10) {
         res.status(413).send({
             "error": "Ohjelmointikielen nimi ei voi olla yli kymmentä merkkiä."
         });
