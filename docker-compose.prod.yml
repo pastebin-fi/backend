@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+  # actually using outsourced db
+  # mongodb:
+  api:
+    image: ghcr.io/pastebin-fi/powerpaste:master
+    ports:
+      - '8880:3001'
+    env_file:
+      - .env
