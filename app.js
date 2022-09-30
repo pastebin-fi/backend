@@ -126,6 +126,7 @@ app.get('/pastes', paste.filter);
 
 // app.get('/users', users.filter);
 
+app.get('/ip', (request, response) => response.send(request.ip))
 
 app.listen(port, () => {
     console.log(`pastebin.fi API listening at ${protocol}://${hostname}:${port}`);
