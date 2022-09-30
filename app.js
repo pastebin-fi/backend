@@ -23,9 +23,10 @@ let sess = {
     saveUninitialized: true
 };
 
-if (process.env.TRUST_PROXY > 0) {
-    app.set('trust proxy', process.env.TRUST_PROXY);
-}
+// Fuck it just hardcode everything
+// if (process.env.TRUST_PROXY) {
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])
+// }
 
 if (protocol.includes("https")) {
     sess.cookie.secure = true;
