@@ -1,6 +1,10 @@
 # pastebin.fi API
 This is the API for [pastebin.fi](https://pastebin.fi). The frontend can be found here: [PastebinUI](https://github.com/pastebin-fi/PastebinUI)
 
+## Deployment
+
+Docker image is automatically built to [github content registry](https://github.com/pastebin-fi/PowerPaste/pkgs/container/powerpaste) from master branch. The docker image is also automatically pulled with watchtower on the server. 
+
 ## Stack
 
 ### Backend
