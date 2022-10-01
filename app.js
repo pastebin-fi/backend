@@ -67,31 +67,12 @@ app.use(session(sess));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json({ limit: '10mb' }));
 
-app.locals = {
-    site: {
-        title: process.env.TITLE,
-        description: process.env.DESCRIPTION,
-        protocol,
-        hostname,
-        port,
-    },
-    defaultPaste: {
-        content: `Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dicta tempore ad amet accusamus mollitia quis culpa provident odio facere, dolor quibusdam deleniti fuga minus vero molestias asperiores sequi! Officia atque, hic aspernatur culpa necessitatibus cumque doloremque rem. Fugiat vitae consectetur dolore eos voluptatibus vel, laborum saepe repellendus, dignissimos quaerat aut minus suscipit omnis possimus ipsam cumque sint repellat doloribus quasi neque quos laboriosam temporibus ullam? Ipsa maiores sequi quod perspiciatis vero cumque voluptatum quibusdam, ex impedit necessitatibus! Aliquid nulla ipsam, cupiditate aspernatur id eius fugit quasi maxime esse nam cum. Sunt tempore exercitationem praesentium, recusandae omnis asperiores sequi mollitia amet!
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dicta tempore ad amet accusamus mollitia quis culpa provident odio facere, dolor quibusdam deleniti fuga minus vero molestias asperiores sequi! Officia atque, hic aspernatur culpa necessitatibus cumque doloremque rem. Fugiat vitae consectetur dolore eos voluptatibus vel, laborum saepe repellendus, dignissimos quaerat aut minus suscipit omnis possimus ipsam cumque sint repellat doloribus quasi neque quos laboriosam temporibus ullam? Ipsa maiores sequi quod perspiciatis vero cumque voluptatum quibusdam, ex impedit necessitatibus! Aliquid nulla ipsam, cupiditate aspernatur id eius fugit quasi maxime esse nam cum. Sunt tempore exercitationem praesentium, recusandae omnis asperiores sequi mollitia amet!`
-    }
-};
-
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
-    res.render('pages/index');
-});
+app.get('/', (request, response) => response.send({ status: "up" }));
 
 // Implement also user metrics
 app.get('/metrics', metrics.get);
-
-app.get('/sitemap.xml', sitemap.get);
 
 // PASTES
 app.post('/pastes', createPasteLimiter, paste.new);
@@ -113,7 +94,7 @@ app.get('/pastes', paste.filter);
 
 // app.get('/users', users.filter);
 
-app.get('/ip', (request, response) => response.send(request.ip))
+app.get('/ip', (request, response) => response.send({ ip: request.ip}))
 
 app.listen(port, () => {
     console.log(`pastebin.fi API listening at ${protocol}://${hostname}:${port}`);
