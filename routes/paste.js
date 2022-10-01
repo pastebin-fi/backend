@@ -187,8 +187,12 @@ exports.filter = async(req, res) => {
         .skip(offset)
         .limit(limit)
         .select('id title meta author date -_id')
+        .lean()
         .exec((err, pastes) => {
             if (err) console.error(err)
+            for (let index = 0; index < pastes.length; index++) {
+                pastes[index].author = unknownAuthor;
+            }
             res.send(pastes)
         })
 };
