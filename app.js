@@ -4,7 +4,6 @@ const session = require('express-session');
 const rateLimit = require('express-rate-limit')
 
 const paste = require('./routes/paste');
-const sitemap = require('./routes/sitemap');
 const metrics = require('./routes/metrics');
 
 const app = express();
