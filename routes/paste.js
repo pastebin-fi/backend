@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const sha256 = require('js-sha256').sha256;
-const findInFiles = require('find-in-files');
 const fs = require('fs/promises');
 
 const { makeid, checkReputation } = require('../helpers');
@@ -79,6 +78,7 @@ exports.new = async (req, res) => {
         author: null,
         id: makeid(7),
         ip: ip,
+        content: content,
         hidden: req.body.private == true ? true : false,
         programmingLanguage: language,
         sha256: hash,
@@ -91,7 +91,7 @@ exports.new = async (req, res) => {
         },
     };
 
-    await fs.writeFile(`${dataDir}/${hash}`, content);
+    // await fs.writeFile(`${dataDir}/${hash}`, content);
 
     Paste.create(paste, (err, paste) => {
         if (err) throw err;
@@ -147,11 +147,9 @@ exports.get = (req, res) => {
 };
 
 exports.filter = async(req, res) => {
-    // Highlight the search result for client.
+    // TODO: Highlight the search result for client. || can be done on the client side
 
-    // let limit 
-    let title = req.query.title || "";
-    let content = req.query.content || "";
+    let query = req.query.q || "";
     let offset = req.query.offset || 0;
     let limit = req.query.limit || 10;
     let sorting = req.query.sorting || "-meta.views";
@@ -159,42 +157,15 @@ exports.filter = async(req, res) => {
     // Do not allow too many pastes
     limit = limit > 30 ? 30 : limit;
 
-    // If it is content search ignore almost every other thing
-    if (content) {
-        let results = await findInFiles.findSync(content, dataDir, '')
-
-        let hashes = []
-
-        for (const filePath in results) {
-            let info = results[filePath];
-            const hash = filePath.replace(dataDir.replace(/[^a-z0-9]/gi,''), '').replace(/[^a-z0-9]/gi,'')
-            console.log(hash)
-            hashes.push(hash)
-        }
-
-        console.log(hashes)
-
-        // Important to not search in non hidden files (filter them out)
-        let visiblePastes = await Paste.find({ hidden: false })
-            .select('id meta allowedreads date author programmingLanguage -_id')
-            .where('sha256')
-            .in(hashes)
-            .exec();
-
-        res.send(visiblePastes)
-        
-        return;
-    }
-
     allowedSortings = ['-date', 'date', '-meta.views', 'meta.views', '-meta.size', 'meta.size', '-meta.votes', 'meta.votes', '-meta.favs', '-meta.favs']
     if (!allowedSortings.includes(sorting))
         sorting = '-meta.views'
 
     let search = { hidden: false };
     let score = {};
-    if (title) {
+    if (query) {
         score = { score: { $meta: "textScore" } }
-        search.$text = { $search: title }
+        search.$text = { $search: query }
     }
 
     Paste.find(search, score)
