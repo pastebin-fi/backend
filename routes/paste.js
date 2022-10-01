@@ -40,26 +40,32 @@ exports.new = async (req, res) => {
     const size = Buffer.byteLength(content, 'utf8')
     const language = req.body.language ? req.body.language : 'html'
 
-    if (size > 10_000_000) {
-        res.status(413).send({
-            "error": "Palveluun ei voi luoda ilman tiliä yli 10 MB liitteitä. Luo tili nostaaksesi raja 20 MB."
-        });
-        return;
-    }
+    if (size > 10_000_000)
+        return res.status(413).send({
+            status : "fail",
+            data : { 
+                "title" : "Liian iso",
+                "message": "Palveluun ei voi luoda ilman tiliä yli 10 MB liitteitä."
+            }
+        })
 
-    if (title.length > 300) {
-        res.status(413).send({
-            "error": "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
-        });
-        return;
-    }
+    if (title.length > 300)
+        return res.status(413).send({
+            status : "fail",
+            data : { 
+                "title" : "Virheellinen nimi",
+                "message": "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
+            }
+        })
 
-    if (language.length > 10) {
-        res.status(413).send({
-            "error": "Ohjelmointikielen nimi ei voi olla yli kymmentä merkkiä."
-        });
-        return;
-    }
+    if (language.length > 10)
+        return res.status(413).send({
+            status : "fail",
+            data : { 
+                "title" : "Virheellinen ohjelmointikieli",
+                "message": "Ohjelmointikielen nimi ei voi olla yli kymmentä merkkiä."
+            }
+        })
 
     const hash = sha256(content)
     if (await Paste.exists({ sha256: hash })) {
@@ -111,7 +117,13 @@ exports.get = (req, res) => {
         if (err) throw err
 
         if (paste == null)
-            return res.status(404).send({"error": "Liitettä ei ole olemassa tai se on poistettu. "})
+            return res.status(404).send({
+                status : "fail",
+                data : { 
+                    "title" : "Liitettä ei löydy",
+                    "message": "Liitettä ei ole olemassa tai se on poistettu."
+                }
+            })
 
         await Paste.findOneAndUpdate({ id: requestedId }, { $inc: { 'meta.views': 1 } });
         
