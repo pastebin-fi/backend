@@ -13,6 +13,11 @@ exports.Paste = Paste;
 const abuseipdbKey = process.env.ABUSEIPDB_KEY
 const dataDir = process.env.DATA_DIR
 
+const unknownAuthor = {
+    name: "tuntematon",
+    avatar: "https://images.unsplash.com/photo-1534294668821-28a3054f4256?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80"
+}
+
 exports.new = async (req, res) => {
     if (req.body.paste === "") {
         res.redirect('/');
@@ -145,16 +150,13 @@ exports.get = (req, res) => {
             const content = await fs.readFile(`${dataDir}/${paste.sha256}`)
             visiblePaste.content = content.toString()
             console.log(`${(new Date).toLocaleString('fi-FI')} - Katsottu liite ${paste.id}`);
-            res.send(visiblePaste);
         } catch (error) {
             visiblePaste.content = paste.content
-            res.send(visiblePaste)
-            // res
-            //     .status(410)
-            //     .send({
-            //         "error": "Liitteen data on kadonnut levyltä."
-            //     });
         }
+
+        visiblePaste.author = unknownAuthor
+
+        res.send(visiblePaste)
     });
 };
 
