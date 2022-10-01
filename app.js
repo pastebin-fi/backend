@@ -35,7 +35,7 @@ if (protocol.includes("https")) {
 
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 50, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	max: 500, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
     message: {
         message: 'Too many requests from this ip.'
     },
