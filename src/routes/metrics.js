@@ -1,6 +1,6 @@
 const Paste = require('./paste').Paste;
 
-exports.get = (req, res) => {
+export function getMetrics(req, res) {
     Paste.find().select('meta.views hidden -_id').exec((err, pastes) => {
         if (err) throw err
         const totalViews = pastes

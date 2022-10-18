@@ -1,100 +1,78 @@
 require('dotenv').config();
-const express = require('express');
-const session = require('express-session');
-const rateLimit = require('express-rate-limit')
 
-const paste = require('./routes/paste');
-const metrics = require('./routes/metrics');
+import express, { urlencoded, json } from 'express';
+import session from 'express-session';
 
-const app = express();
+import { getPaste, newPaste, filterPastes } from './routes/paste';
+import { getMetrics } from './routes/metrics';
 
 const urlRegex = new RegExp("(?<protocol>https?):\/\/(?<hostname>[A-Za-z.0-9]*)\/?:?(?<port>\d*)", "g");
 const urlMatch = urlRegex.exec(process.env.SITE_URL);
 
 const protocol = urlMatch.groups.protocol ? urlMatch.groups.protocol : "http";
 const hostname = urlMatch.groups.hostname ? urlMatch.groups.hostname : "localhost";
-const port = urlMatch.groups.port ? urlMatch.groups.port : 3001;
+const port = urlMatch.groups.port ? urlMatch.groups.port : 8080;
 
-let sess = {
+let sessionEnvironment = {
     secret: process.env.SECRET,
     cookie: {},
     resave: true,
     saveUninitialized: true
 };
 
-// Fuck it just hardcode everything
-// if (process.env.TRUST_PROXY) {
-app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])
-// }
+function initRoutes() {
+	// General routes
+	app.get('/ip', (request, response) => response.send({ ip: request.ip}))
+	app.get('/', (_, response) => response.send({ status: "up" }));
+	app.get('/metrics', getMetrics);
 
-if (protocol.includes("https")) {
-    sess.cookie.secure = true;
-    console.log("Using secure cookies...");
+	// Paste API handler
+	const pastesRouter = app.router("/pastes")
+	pastesRouter.post('/', createPasteLimiter, newPaste);
+	pastesRouter.get('/:id', getPaste);
+	pastesRouter.get('/', filterPastes); 
+
+	/* 
+		-- Routes to be implemented --
+		pastesRouter.delete('/', paste.delete);
+
+		-- Users API handler | Not yet implemented either --
+		app.post('/auth', loginAccountLimiter, user.auth)
+		app.post('/users', createAccountLimiter, user.new)
+		app.get('/users/:id', user.get);
+		app.get('/users', users.filter); 
+	*/
+	
+	return { pastesRouter }
 }
-const createPasteLimiter = rateLimit({
-	windowMs: 30 * 60 * 1000 , // 30 minutes
-	max: 20, // Limit each IP to 20 new paste requests per `window` (here, 30 mins)
-	message: {
-        message: 'Too many pastes created from this IP.'
-    },
-	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
 
+function initExpressRouter() {
+	const app = express();
 
-const createAccountLimiter = rateLimit({
-	windowMs: 60 * 60 * 1000 * 24, // 1 day
-	max: 5, // Limit each IP to 5 create account requests per `window` (here, per day) -> keep in mind that account creations can be unsuccesful but they should not because frontend tells if cannot be created
-    message: {
-        message: 'Too many accounts created from this IP.',
-    },
-	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
+	//TODO: don't use hardcoded values
+	app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])
+	app.use(session(sessionEnvironment));
+	app.set('view engine', 'ejs');
 
-const loginAccountLimiter = rateLimit({
-	windowMs: 30 * 60 * 1000 , // 30 minutes
-	max: 20, // Limit each IP to 20 login requests per `window` (here, 30 mins)
-	message:
-		'Too many login attempts for this IP.',
-	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
+	app.use(urlencoded({ extended: true, limit: '10mb' }));
+	app.use(json({ limit: '10mb' }));
 
-app.use(session(sess));
+	app.use(initRoutes().pastesRouter)
+	
+	return app
+}
 
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.json({ limit: '10mb' }));
+function setupServer() {
+	const expressBackend = initExpressRouter()
 
-app.set('view engine', 'ejs');
+	if (protocol.includes("https")) {
+	    sessionEnvironment.cookie.secure = true;
+	    logger.log("Using secure cookies");
+	}
 
-app.get('/', (request, response) => response.send({ status: "up" }));
+	expressBackend.listen(port, () => {
+	    console.log(`pastebin.fi API listening at ${protocol}://${hostname}:${port}`);
+	});
+}
 
-// Implement also user metrics
-app.get('/metrics', metrics.get);
-
-// PASTES
-app.post('/pastes', createPasteLimiter, paste.new);
-
-app.get('/pastes/:id', paste.get); // Might be wise to move into /pastes?id=xyz
-
-// app.delete('/pastes', paste.delete);
-
-// Contains different filterings: latest, greatest, search text in title
-app.get('/pastes', paste.filter);
-
-// USERS
-// Not yet implemented
-// app.post('/auth', loginAccountLimiter, user.auth)
-
-// app.post('/users', createAccountLimiter, user.new)
-
-// app.get('/users/:id', user.get);
-
-// app.get('/users', users.filter);
-
-app.get('/ip', (request, response) => response.send({ ip: request.ip}))
-
-app.listen(port, () => {
-    console.log(`pastebin.fi API listening at ${protocol}://${hostname}:${port}`);
-});
+setupServer()

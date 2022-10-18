@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-exports.PasteSchema = new Schema({
+export const PasteSchema = new Schema({
     title: String,
     id: String,
     author: { type: String, default: "Anonymous" },
@@ -29,7 +29,7 @@ exports.PasteSchema = new Schema({
     },
 });
 
-exports.UserSchema = new Schema({
+export const UserSchema = new Schema({
     name: String,
     pwHash: String,
     pwSalt: String,

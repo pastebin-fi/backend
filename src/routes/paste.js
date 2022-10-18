@@ -1,14 +1,15 @@
-const mongoose = require('mongoose');
-const sha256 = require('js-sha256').sha256;
-const fs = require('fs/promises');
+import { connect, model } from 'mongoose';
+import { sha256 } from 'js-sha256';
+import { readFile } from 'fs/promises';
 
-const { makeid, checkReputation } = require('../helpers');
-const schemas = require('../schemas');
+import { makeid, checkReputation } from '../helpers';
+import { PasteSchema } from '../schemas';
 
-mongoose.connect(process.env.MONGO_URI);
+connect(process.env.MONGO_URI);
 
-const Paste = mongoose.model('Paste', schemas.PasteSchema);
-exports.Paste = Paste;
+const Paste = model('Paste', PasteSchema);
+const _Paste = Paste;
+export { _Paste as Paste };
 
 const abuseipdbKey = process.env.ABUSEIPDB_KEY
 const dataDir = process.env.DATA_DIR
@@ -18,18 +19,18 @@ const unknownAuthor = {
     avatar: "https://images.unsplash.com/photo-1534294668821-28a3054f4256?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80"
 }
 
-exports.new = async (req, res) => {
+export async function newPaste(req, res) {
     if (req.body.paste === "") {
         res.redirect('/');
         return;
     }
 
     const ip = process.env.TRUST_PROXY > 0 ? req.headers['x-forwarded-for'] : req.socket.remoteAddress.replace(/^.*:/, '');
-    const reputation = JSON.parse(await checkReputation(ip, abuseipdbKey))
+    const reputation = JSON.parse(await checkReputation(ip, abuseipdbKey));
 
     if ("errors" in reputation) {
         reputation.errors.forEach(error => {
-            console.log('AbuseIPDB', error)
+            console.log('AbuseIPDB', error);
         });
     } else {
         if (reputation.data.abuseConfidenceScore > 60) {
@@ -40,42 +41,42 @@ exports.new = async (req, res) => {
         }
     }
 
-    const content = req.body.paste
-    const title = req.body.title
-    const size = Buffer.byteLength(content, 'utf8')
-    const language = req.body.language ? req.body.language : 'html'
+    const content = req.body.paste;
+    const title = req.body.title;
+    const size = Buffer.byteLength(content, 'utf8');
+    const language = req.body.language ? req.body.language : 'html';
 
-    if (size > 10_000_000)
+    if (size > 10000000)
         return res.status(413).send({
-            status : "fail",
-            data : { 
-                "title" : "Liian iso",
+            status: "fail",
+            data: {
+                "title": "Liian iso",
                 "message": "Palveluun ei voi luoda ilman tiliä yli 10 MB liitteitä."
             }
-        })
+        });
 
     if (title.length > 300)
         return res.status(413).send({
-            status : "fail",
-            data : { 
-                "title" : "Virheellinen nimi",
+            status: "fail",
+            data: {
+                "title": "Virheellinen nimi",
                 "message": "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
             }
-        })
+        });
 
     if (language.length > 10)
         return res.status(413).send({
-            status : "fail",
-            data : { 
-                "title" : "Virheellinen ohjelmointikieli",
+            status: "fail",
+            data: {
+                "title": "Virheellinen ohjelmointikieli",
                 "message": "Ohjelmointikielen nimi ei voi olla yli kymmentä merkkiä."
             }
-        })
+        });
 
-    const hash = sha256(content)
+    const hash = sha256(content);
     if (await Paste.exists({ sha256: hash })) {
-        console.log("Liite samalla sisällöllä on jo olemassa")
-        const id = (await Paste.findOne({ sha256: hash }).select('id -_id')).id
+        console.log("Liite samalla sisällöllä on jo olemassa");
+        const id = (await Paste.findOne({ sha256: hash }).select('id -_id')).id;
         res.send({
             "id": id
         });
@@ -103,9 +104,9 @@ exports.new = async (req, res) => {
     };
 
     // await fs.writeFile(`${dataDir}/${hash}`, content);
-
     Paste.create(paste, (err, paste) => {
-        if (err) throw err;
+        if (err)
+            throw err;
         console.log(`${Date.now().toString()} - New paste created with id ${paste.id}`);
         res.send({
             "id": paste.id,
@@ -114,7 +115,7 @@ exports.new = async (req, res) => {
     });
 };
 
-exports.get = (req, res) => {
+export function getPaste(req, res) {
     // Show other similar pastes under the paste
     const requestedId = req.params.id;
 
@@ -147,7 +148,7 @@ exports.get = (req, res) => {
         Object.keys(visiblePaste).forEach((key) => allowedKeys.includes(key) || delete visiblePaste[key]);
 
         try {
-            const content = await fs.readFile(`${dataDir}/${paste.sha256}`)
+            const content = await readFile(`${dataDir}/${paste.sha256}`)
             visiblePaste.content = content.toString()
             console.log(`${(new Date).toLocaleString('fi-FI')} - Katsottu liite ${paste.id}`);
         } catch (error) {
@@ -158,9 +159,9 @@ exports.get = (req, res) => {
 
         res.send(visiblePaste)
     });
-};
+}
 
-exports.filter = async(req, res) => {
+export async function filterPastes(req, res) {
     // TODO: Highlight the search result for client. || can be done on the client side
 
     let query = req.query.q || "";
@@ -195,4 +196,4 @@ exports.filter = async(req, res) => {
             }
             res.send(pastes)
         })
-};
+}
