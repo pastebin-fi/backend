@@ -1,78 +1,65 @@
-require('dotenv').config();
+import express, { urlencoded, json } from "express"
+import session from "express-session"
 
-import express, { urlencoded, json } from 'express';
-import session from 'express-session';
+import { Logger } from "./utils/logger.js"
+import { connect } from "mongoose"
+import config from "./config.js"
+import Pastes from "./routes/paste.js"
+import { General } from "./routes/general.js"
 
-import { getPaste, newPaste, filterPastes } from './routes/paste';
-import { getMetrics } from './routes/metrics';
-
-const urlRegex = new RegExp("(?<protocol>https?):\/\/(?<hostname>[A-Za-z.0-9]*)\/?:?(?<port>\d*)", "g");
-const urlMatch = urlRegex.exec(process.env.SITE_URL);
-
-const protocol = urlMatch.groups.protocol ? urlMatch.groups.protocol : "http";
-const hostname = urlMatch.groups.hostname ? urlMatch.groups.hostname : "localhost";
-const port = urlMatch.groups.port ? urlMatch.groups.port : 8080;
+const logger = new Logger(true, true)
 
 let sessionEnvironment = {
-    secret: process.env.SECRET,
+    secret: config.secret || "",
     cookie: {},
     resave: true,
-    saveUninitialized: true
-};
-
-function initRoutes() {
-	// General routes
-	app.get('/ip', (request, response) => response.send({ ip: request.ip}))
-	app.get('/', (_, response) => response.send({ status: "up" }));
-	app.get('/metrics', getMetrics);
-
-	// Paste API handler
-	const pastesRouter = app.router("/pastes")
-	pastesRouter.post('/', createPasteLimiter, newPaste);
-	pastesRouter.get('/:id', getPaste);
-	pastesRouter.get('/', filterPastes); 
-
-	/* 
-		-- Routes to be implemented --
-		pastesRouter.delete('/', paste.delete);
-
-		-- Users API handler | Not yet implemented either --
-		app.post('/auth', loginAccountLimiter, user.auth)
-		app.post('/users', createAccountLimiter, user.new)
-		app.get('/users/:id', user.get);
-		app.get('/users', users.filter); 
-	*/
-	
-	return { pastesRouter }
+    saveUninitialized: true,
 }
 
 function initExpressRouter() {
-	const app = express();
+    const app = express()
 
-	//TODO: don't use hardcoded values
-	app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])
-	app.use(session(sessionEnvironment));
-	app.set('view engine', 'ejs');
+    app.use("/", new General().router)
+    app.use("/pastes", new Pastes().router)
 
-	app.use(urlencoded({ extended: true, limit: '10mb' }));
-	app.use(json({ limit: '10mb' }));
+    //TODO: don't use hardcoded values
+    app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"])
+    app.use(session(sessionEnvironment))
+    app.set("view engine", "ejs")
 
-	app.use(initRoutes().pastesRouter)
-	
-	return app
+    app.use(urlencoded({ extended: true, limit: "10mb" }))
+    app.use(json({ limit: "10mb" }))
+
+    return app
 }
 
-function setupServer() {
-	const expressBackend = initExpressRouter()
+async function setupServer() {
+    const urlRegex = new RegExp("(?<protocol>https?)://(?<hostname>[A-Za-z.0-9]*)/?:?(?<port>d*)", "g")
+    const urlMatch = urlRegex.exec(config.site_url || "")
+    if (!urlMatch) return logger.error("Server URL regex is invalid")
 
-	if (protocol.includes("https")) {
-	    sessionEnvironment.cookie.secure = true;
-	    logger.log("Using secure cookies");
-	}
+    const protocol = urlMatch.groups?.protocol ? urlMatch.groups.protocol : "http"
 
-	expressBackend.listen(port, () => {
-	    console.log(`pastebin.fi API listening at ${protocol}://${hostname}:${port}`);
-	});
+    const hostname = urlMatch.groups?.hostname ? urlMatch.groups.hostname : "localhost"
+
+    const port = urlMatch.groups?.port ? urlMatch.groups.port : 8080
+
+    if (protocol.includes("https")) {
+        sessionEnvironment.cookie.secure = true
+        logger.log("Using secure cookies")
+    }
+
+    initExpressRouter()
+    logger.log(`Connecting to database (mongo)`)
+    try {
+        await connect(config.mongo_uri || "")
+        logger.log(`Database connected, continuing`)
+    } catch (err) {
+        logger.error(err)
+    }
+
+    logger.log(`Starting server....`)
+    initExpressRouter().listen(port, async () => logger.log(`Server listening at ${protocol}://${hostname}:${port}`))
 }
 
-setupServer()
+;(async () => await setupServer())()

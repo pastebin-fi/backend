@@ -1,29 +1,40 @@
-const Paste = require('./paste').Paste;
+import { Routes } from "./router";
 
-export function getMetrics(req, res) {
-    Paste.find().select('meta.views hidden -_id').exec((err, pastes) => {
-        if (err) throw err
+class Metrics extends Routes {
+    async getMetrics(req, res) {
+        const nopastes = () => this.sendErrorResponse(res, 404, "Liitteitä ei löytynyt", 
+                "Emme ole vastaanottaneet vielä yhtäkään liitettä. Ole ensimmäinen!"
+            )
+
+        let pastes = undefined
+        try {
+            pastes = await this.PasteModel.find().select('meta.views hidden -_id')
+            if (!pastes) return nopastes()
+        } catch (err) {
+            return nopastes()
+        }
+        let pasteCount = {
+            total: 0,
+            public: 0,
+            private: 0,
+        }
+
         const totalViews = pastes
-            .map(paste => paste.meta.views)
-            .filter(view => ![null, undefined].includes(view))
-            .reduce((a, b) => a + b, 0)
-
+            .map(paste => {
+                pasteCount.total += 1
+                if (paste.hidden) pasteCount.private += 1
+                else pasteCount.public += 1
+                return paste.meta?.views
+            })
+            .filter(views => views != null)
+            .reduce((a, b) => {
+                return a && b ? a + b : a
+            }, 0) || 0
+        
             
-        const totalPastes = pastes.length
-        const privatePastes = pastes
-            .map(paste => paste.hidden)
-            .filter((hidden) => { return hidden == true })
-            .reduce((a, b) => a + b, 0)
-        const publicPastes = totalPastes - privatePastes
-        
-        
         res.send({
             "totalViews": totalViews,
-            "pasteCount": {
-                "total": totalPastes,
-                "public": publicPastes,
-                "private": privatePastes
-            },
+            "pasteCount": pasteCount,
         });
-    });
-};
+    };
+}

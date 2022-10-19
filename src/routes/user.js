@@ -6,8 +6,6 @@ const fs = require('fs/promises');
 const { makeid, checkReputation } = require('../helpers');
 const schemas = require('../schemas');
 
-mongoose.connect(process.env.MONGO_URI);
-
 const Paste = mongoose.model('Paste', schemas.PasteSchema);
 exports.Paste = Paste;
 
