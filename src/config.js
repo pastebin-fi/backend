@@ -1,6 +1,6 @@
 export default {
     mongo_uri: "mongodb+srv://user:pass@host/database",
-    site_url: "http://localhost:3000",
+    site_url: "http://localhost:8080",
     title: "Powerpaste",
     description: "The best pastebin service ever",
     trust_proxy: 0,

@@ -2,6 +2,7 @@
   "name": "powerpaste",
   "version": "1.0.0",
   "description": "Best pastebin software ever",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

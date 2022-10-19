@@ -34,22 +34,22 @@ function initExpressRouter() {
 }
 
 async function setupServer() {
-    const urlRegex = new RegExp("(?<protocol>https?)://(?<hostname>[A-Za-z.0-9]*)/?:?(?<port>d*)", "g")
+    const urlRegex = new RegExp("(?<pr>https?)://(?<h>[A-Za-z.0-9]*)/?:?(?<po>d*)", "g")
     const urlMatch = urlRegex.exec(config.site_url || "")
     if (!urlMatch) return logger.error("Server URL regex is invalid")
 
-    const protocol = urlMatch.groups?.protocol ? urlMatch.groups.protocol : "http"
+    const serverListenerProperties = {
+        protocol: urlMatch.groups?.pr ? urlMatch.groups.pr : "http",
+        hostname: urlMatch.groups?.h ? urlMatch.groups.h : "localhost",
+        port: urlMatch.groups?.po ? urlMatch.groups.po : 8080,
+        display: () => `${this.protocol}://${this.hostname}:${this.hostname}`,
+    }
 
-    const hostname = urlMatch.groups?.hostname ? urlMatch.groups.hostname : "localhost"
-
-    const port = urlMatch.groups?.port ? urlMatch.groups.port : 8080
-
-    if (protocol.includes("https")) {
+    if (serverListenerProperties.protocol.includes("https")) {
         sessionEnvironment.cookie.secure = true
         logger.log("Using secure cookies")
     }
 
-    initExpressRouter()
     logger.log(`Connecting to database (mongo)`)
     try {
         await connect(config.mongo_uri || "")
@@ -59,7 +59,9 @@ async function setupServer() {
     }
 
     logger.log(`Starting server....`)
-    initExpressRouter().listen(port, async () => logger.log(`Server listening at ${protocol}://${hostname}:${port}`))
+    initExpressRouter().listen(serverListenerProperties.display(), async () =>
+        logger.log(`Server listening at ${serverListenerProperties.display()}`)
+    )
 }
 
 ;(async () => await setupServer())()
