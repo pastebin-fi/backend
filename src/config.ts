@@ -1,5 +1,5 @@
 export default {
-    mongo_uri: "mongodb+srv://api:VktYOXpTWCZGNHU1cG9NanElQjh5eF4jNzlDVnJkVTgK@cluster0.zocsxsn.mongodb.net/?retryWrites=true&w=majority",
+    mongo_uri: "mongodb+srv://api:password@server.com/?flags",
     site_url: "http://127.0.0.1:8200",
     title: "Powerpaste",
     description: "The best pastebin service ever",
