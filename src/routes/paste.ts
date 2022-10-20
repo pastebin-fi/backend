@@ -1,23 +1,24 @@
 import { sha256 } from "js-sha256"
 import { readFile } from "fs/promises"
-
-import config from "../config.js"
-import { newPasteRateLimiter } from "../ratelimiters/pastes.js"
-import { makeid } from "../helpers.js"
-import { Routes } from "./router.js"
 import { Router } from "express"
 
+import config from "../config"
+import { newPasteRateLimiter } from "../ratelimiters/pastes"
+import { makeid } from "../helpers"
+import { Routes } from "./router"
+
 class Pastes extends Routes {
+    router: Router
+
     constructor() {
         super()
-
         this.router = Router()
         this.router.post("/", newPasteRateLimiter, this.checkClientReputation, this.newPaste) // Create a new paste
         this.router.get("/:id", this.getPaste) // Get a specific paste
         this.router.get("/", this.filterPastes) // Search pastes
     }
 
-    sendPasteNotFoundResponse(res) {
+    sendPasteNotFoundResponse(res: Response) {
         return this.sendErrorResponse(
             res,
             404,
@@ -120,7 +121,7 @@ class Pastes extends Routes {
         try {
             await this.PasteModel.findOneAndUpdate({ id: requestedId }, { $inc: { "meta.views": 1 } })
         } catch (err) {
-            return this.sendErrorResponse()
+            return this.sendPasteNotFoundResponse(res)
         }
 
         if (paste.meta && !paste.meta.size) {
@@ -186,7 +187,7 @@ class Pastes extends Routes {
         ]
         if (!allowedSortings.includes(sorting)) sorting = "-meta.views"
 
-        let search = { hidden: false }
+        let search = { hidden: false, $text: undefined }
         let score = {}
         if (query) {
             score = { score: { $meta: "textScore" } }

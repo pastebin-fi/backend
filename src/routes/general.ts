@@ -1,7 +1,9 @@
 import { Router } from "express"
-import { Routes } from "./router.js"
+import { Routes } from "./router"
 
 class General extends Routes {
+    router: Router
+
     constructor() {
         super()
         // General routes

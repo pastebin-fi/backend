@@ -1,17 +1,18 @@
 # pastebin.fi API
+
 This is the API for [pastebin.fi](https://pastebin.fi). The frontend can be found here: [PastebinUI](https://github.com/pastebin-fi/PastebinUI)
 
 ## Deployment
 
-Docker image is automatically built to [github content registry](https://github.com/pastebin-fi/PowerPaste/pkgs/container/powerpaste) from master branch. The docker image is also automatically pulled with watchtower on the server. 
+Docker image is automatically built to [github content registry](https://github.com/pastebin-fi/PowerPaste/pkgs/container/powerpaste) from master branch. The docker image is also automatically pulled with watchtower on the server.
 
 ## Stack
 
 ### Backend
 
-- Node.JS (version 16)
-- MongoDB (mongoose)
-- Local File System (paste storage)
+-   Node.JS (version 16)
+-   MongoDB (mongoose)
+-   Local File System (paste storage)
 
 The server stores paste content to local file system and other relevant information to MongoDB. I was considering to use S3 but at Wasabi it had some hiccups from time to time (requests did not finish).
 
@@ -29,15 +30,15 @@ If you are developing something I would suggest to use nodemon (`npm i -g nodemo
 
 `docker-compose.prod.yml` contains an example configuration.
 
-## Environment variables
+## Configuration variables
 
-| Key         | Description      |
-| ----------- | ---------------- |
-| MONGO_URI   | Example: `mongodb+srv://user:pass@host/database`. This is the URI that MongoDB tries to connect to. It should be in format `mongodb+src://<user>:<password>@<hostname>/<database>` |
-| SITE_URL    | Example: `http://localhost:3000`. The app parser required info from it. |
-| TITLE       | Defines the site title. 
-| DESCRIPTION | Describe your pastebin. Visible in some places. |
-| TRUST_PROXY | Number of proxies to trust (handy when using reverse proxy). |
-| SECRET      | Should be something random and unique. |
+| Key         | Description                                                                                                                                                                        |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| mongo_uri   | Example: `mongodb+srv://user:pass@host/database`. This is the URI that MongoDB tries to connect to. It should be in format `mongodb+src://<user>:<password>@<hostname>/<database>` |
+| site_url    | Example: `http://localhost:3000`. The app parser required info from it.                                                                                                            |
+| title       | Defines the site title.                                                                                                                                                            |
+| description | Describe your pastebin. Visible in some places.                                                                                                                                    |
+| trust_proxy | Number of proxies to trust (handy when using reverse proxy).                                                                                                                       |
+| secret      | Should be something random and unique.                                                                                                                                             |
 
 ## REST API Documentation

@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 export const makeid = (length) => {
     let result = '';
     let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

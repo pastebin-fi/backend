@@ -1,10 +1,18 @@
-import { checkReputation } from "../helpers.js"
-import { Logger } from "../utils/logger.js"
-import { PasteSchema } from "../schemas.js"
-import { model } from "mongoose"
-import config from "../config.js"
+import { checkReputation } from "../helpers"
+import { Logger } from "../utils/logger"
+import { PasteSchema } from "../schemas"
+import { Model, model } from "mongoose"
+import config from "../config"
 
 class Routes {
+    criticalLogger?: Logger
+    logger?: Logger
+    PasteModel: Model<any>
+    unknown_author: {
+        name: string;
+        avatar: string;
+    }
+
     constructor() {
         this.criticalLogger = new Logger(true, true)
         this.logger = new Logger(true, false)
@@ -17,17 +25,18 @@ class Routes {
         if (!this.PasteModel) this.criticalLogger.error(`Unable to initialize PasteModel`)
     }
 
-    sendErrorResponse(res, status, title, message, additionalfields) {
-        let rsjson = {
+    sendErrorResponse(
+        res: any, 
+        status: number,
+        title: string,
+        message: string,
+        additionalfields?: {}[]
+    ) {
+        return res.status(status).send({
             title: title,
             message: message,
-            data: {},
-        }
-        additionalfields.map((key, value) => {
-            rsjson.data[key] = value
+            data: additionalfields,
         })
-
-        return res.status(status).send()
     }
 
     async checkClientReputation(req, res) {
@@ -36,8 +45,8 @@ class Routes {
         const reputation = JSON.parse(await checkReputation(req.ip, config.abuseipdb_key))
 
         if ("errors" in reputation) {
-            reputation.errors.forEach((error) => {
-                this.logger.error("AbuseIPDB", error)
+            reputation.errors.forEach((error: string) => {
+                this.logger?.error("AbuseIPDB", error)
             })
         } else {
             if (reputation.data.abuseConfidenceScore > 60) {

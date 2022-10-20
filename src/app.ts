@@ -1,17 +1,20 @@
 import express, { urlencoded, json } from "express"
 import session from "express-session"
-
-import { Logger } from "./utils/logger.js"
 import { connect } from "mongoose"
-import config from "./config.js"
-import Pastes from "./routes/paste.js"
-import { General } from "./routes/general.js"
+
+import { Logger } from "./utils/logger"
+import config from "./config"
+import Pastes from "./routes/paste"
+import { General } from "./routes/general"
+import { Metrics } from "./routes/metrics"
 
 const logger = new Logger(true, true)
 
 let sessionEnvironment = {
     secret: config.secret || "",
-    cookie: {},
+    cookie: {
+        secure: false,
+    },
     resave: true,
     saveUninitialized: true,
 }
@@ -21,6 +24,7 @@ function initExpressRouter() {
 
     app.use("/", new General().router)
     app.use("/pastes", new Pastes().router)
+    app.use("/pastes", new Metrics().router)
 
     //TODO: don't use hardcoded values
     app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"])
@@ -42,7 +46,9 @@ async function setupServer() {
         protocol: urlMatch.groups?.pr ? urlMatch.groups.pr : "http",
         hostname: urlMatch.groups?.h ? urlMatch.groups.h : "localhost",
         port: urlMatch.groups?.po ? urlMatch.groups.po : 8080,
-        display: () => `${this.protocol}://${this.hostname}:${this.hostname}`,
+        display: function() {
+            return `${this.protocol}://${this.hostname}:${this.port}`
+        }
     }
 
     if (serverListenerProperties.protocol.includes("https")) {
@@ -50,16 +56,16 @@ async function setupServer() {
         logger.log("Using secure cookies")
     }
 
-    logger.log(`Connecting to database (mongo)`)
+    logger.logBegin(`Connecting to database (mongo)`)
     try {
         await connect(config.mongo_uri || "")
-        logger.log(`Database connected, continuing`)
+        logger.log(`Database connected`)
     } catch (err) {
         logger.error(err)
     }
 
-    logger.log(`Starting server....`)
-    initExpressRouter().listen(serverListenerProperties.display(), async () =>
+    logger.logBegin(`Starting server....`)
+    initExpressRouter().listen(serverListenerProperties.port, async () =>
         logger.log(`Server listening at ${serverListenerProperties.display()}`)
     )
 }
