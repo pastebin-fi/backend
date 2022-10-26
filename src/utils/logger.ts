@@ -32,10 +32,17 @@ class Logger {
     }
 
     warn(...args) {
+        let emptyspaces = []
+        for (let i = args.join(" ").length; i < this.lastBeginWidth; i++) emptyspaces.push(' ')
+        
         this.printLine({ type: "warn", color: 33 }, args)
+        this.lastBeginWidth = 0
     }
 
     error(...args) {
+        let emptyspaces = []
+        for (let i = args.join(" ").length; i < this.lastBeginWidth; i++) emptyspaces.push(' ')
+        
         this.printLine({ type: "error", color: 31, file: stderr }, args)
         if (this.exitOnError) process.exit(1)
     }

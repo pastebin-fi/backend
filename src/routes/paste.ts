@@ -1,24 +1,31 @@
 import { sha256 } from "js-sha256"
 import { readFile } from "fs/promises"
-import { Router } from "express"
+import { RequestHandler, Router } from "express"
 
 import config from "../config"
 import { newPasteRateLimiter } from "../ratelimiters/pastes"
 import { makeid } from "../helpers"
 import { Routes } from "./router"
 
+type RequestParams = Parameters<RequestHandler>
+
 class Pastes extends Routes {
     router: Router
 
     constructor() {
         super()
+
         this.router = Router()
-        this.router.post("/", newPasteRateLimiter, this.checkClientReputation, this.newPaste) // Create a new paste
-        this.router.get("/:id", this.getPaste) // Get a specific paste
-        this.router.get("/", this.filterPastes) // Search pastes
+        this.router.post("/", 
+            newPasteRateLimiter, 
+            this.checkClientReputation.bind(this), 
+            this.newPaste.bind(this)
+        ) // Create a new paste
+        this.router.get("/:id", this.getPaste.bind(this)) // Get a specific paste
+        this.router.get("/", this.filterPastes.bind(this)) // Search pastes
     }
 
-    sendPasteNotFoundResponse(res: Response) {
+    sendPasteNotFoundResponse(res: RequestParams[1]) {
         return this.sendErrorResponse(
             res,
             404,
@@ -27,7 +34,7 @@ class Pastes extends Routes {
         )
     }
 
-    async newPaste(req, res) {
+    async newPaste(req: RequestParams[0], res: RequestParams[1]) {
         if (req.body.paste === "") {
             res.redirect("/")
             return
@@ -44,7 +51,7 @@ class Pastes extends Routes {
                 res,
                 413,
                 "Liite on liian iso",
-                "Palveluun ei voi luoda yli kymmenen (10) MB liitteitä uloskirjautuneena."
+                "Palveluun ei voi luoda yli kymmenen (10) MB liitteitä."
             )
 
         if (title.length > 300)
@@ -55,18 +62,17 @@ class Pastes extends Routes {
                 "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
             )
 
-        if (language.length > 30)
+        if (language.length > 15)
             return this.sendErrorResponse(
                 res,
                 413,
                 "Virheellinen ohjelmointikieli",
-                "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (30) merkkiä."
+                "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (15) merkkiä."
             )
 
         const hash = sha256(content)
         if (await this.PasteModel.exists({ sha256: hash })) {
             const existingPasteID = (await this.PasteModel.findOne({ sha256: hash }).select("id -_id"))?.id
-
             return this.sendErrorResponse(
                 res,
                 409,
@@ -106,7 +112,7 @@ class Pastes extends Routes {
         })
     }
 
-    async getPaste(req, res) {
+    async getPaste(req: RequestParams[0], res: RequestParams[1]) {
         // Show other similar pastes under the paste
         const requestedId = req.params.id
         let paste = undefined
@@ -164,12 +170,17 @@ class Pastes extends Routes {
         res.send(visiblePaste)
     }
 
-    async filterPastes(req, res) {
+    async filterPastes(req: RequestParams[0], res: RequestParams[1]) {
+        function varOrDefault(var1, var2) {
+            if (typeof var1 !== typeof var2) return var2
+            else return var1
+        }
+
         // TODO: Highlight the search result for client. || can be done on the client side
-        let query = req.query.q || ""
-        let offset = req.query.offset || 0
-        let limit = req.query.limit || 10
-        let sorting = req.query.sorting || "-meta.views"
+        let query = varOrDefault(req.query.q, "")
+        let offset = varOrDefault(req.query.offset, 0)
+        let limit = varOrDefault(req.query.limit, 10)
+        let sorting = varOrDefault(req.query.sorting, "-meta-views") 
 
         // Do not allow too many pastes
         limit = limit > 30 ? 30 : limit
@@ -201,7 +212,9 @@ class Pastes extends Routes {
             .select("id title meta author date -_id")
             .lean()
             .exec((err, pastes) => {
-                if (err) console.error(err)
+                if (!pastes) return res.send([])
+                if (err) this.logger.error(err)
+
                 res.send(pastes)
             })
     }

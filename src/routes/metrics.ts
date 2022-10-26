@@ -1,5 +1,7 @@
-import { Router } from "express";
+import { RequestHandler, Router } from "express";
 import { Routes } from "./router";
+
+type RequestParams = Parameters<RequestHandler>
 
 class Metrics extends Routes {
     router: Router
@@ -8,20 +10,23 @@ class Metrics extends Routes {
         super()
 
         this.router = Router()
-        this.router.get("/", this.getMetrics)
+        this.router.get("/", this.getMetrics.bind(this))
     }
 
-    async getMetrics(req, res) {
-        const nopastes = () => this.sendErrorResponse(res, 404, "Liitteitä ei löytynyt", 
-                "Emme ole vastaanottaneet vielä yhtäkään liitettä. Ole ensimmäinen!"
-            )
+    private nopastes(res) {
+        return this.sendErrorResponse(res, 404, "Liitteitä ei löytynyt", 
+            "Emme ole vastaanottaneet vielä yhtäkään liitettä. Ole ensimmäinen!"
+        )
+    }
 
+    async getMetrics(_: RequestParams[0], res: RequestParams[1]) {
         let pastes = undefined
+       
         try {
             pastes = await this.PasteModel.find().select('meta.views hidden -_id')
-            if (!pastes) return nopastes()
-        } catch (err) {
-            return nopastes()
+            if (!pastes) return this.nopastes(res)
+        } catch (err) { 
+            return this.nopastes(res) 
         }
 
         let pasteCount = {
@@ -39,14 +44,15 @@ class Metrics extends Routes {
                 return paste.meta?.views
             })
             .filter(views => views != null)
-            .reduce((a, b) => a && b ? a + b : a, 0)
-        
+            .reduce((a: number, b: number) => a && b ? a + b : a, 0)
             
+
         res.send({
             "totalViews": totalViews,
             "pasteCount": pasteCount,
         });
     };
+
 }
 
 

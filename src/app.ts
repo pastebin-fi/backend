@@ -7,6 +7,7 @@ import config from "./config"
 import Pastes from "./routes/paste"
 import { General } from "./routes/general"
 import { Metrics } from "./routes/metrics"
+import { Routes } from "./routes/router"
 
 const logger = new Logger(true, true)
 
@@ -21,10 +22,11 @@ let sessionEnvironment = {
 
 function initExpressRouter() {
     const app = express()
+    const routes = new Routes()
 
     app.use("/", new General().router)
     app.use("/pastes", new Pastes().router)
-    app.use("/pastes", new Metrics().router)
+    app.use("/metrics", new Metrics().router)
 
     //TODO: don't use hardcoded values
     app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"])
@@ -56,9 +58,9 @@ async function setupServer() {
         logger.log("Using secure cookies")
     }
 
-    logger.logBegin(`Connecting to database (mongo)`)
+    logger.logBegin(`Connecting to database (mongo)...`)
     try {
-        await connect(config.mongo_uri || "")
+        await connect(config.mongo_uri)
         logger.log(`Database connected`)
     } catch (err) {
         logger.error(err)

@@ -1,3 +1,6 @@
+/*
+import config from "../config";
+
 const mongoose = require('mongoose');
 const sha256 = require('js-sha256').sha256;
 const findInFiles = require('find-in-files');
@@ -15,7 +18,7 @@ const dataDir = process.env.DATA_DIR
 exports.new = async (req, res) => {
     if (req.body.username === "") {
         return res.status(413).send({
-            "error": "Käyttäjänimi tulee mainita."
+            "error": "Käyttäjänimi tulee mainita"
         })
     } else if (req.body.email === "") {
         return res.status(413).send({
@@ -27,7 +30,7 @@ exports.new = async (req, res) => {
         })
     }
 
-    const ip = process.env.TRUST_PROXY > 0 ? req.headers['x-forwarded-for'] : req.socket.remoteAddress.replace(/^.*:/, '');
+    const ip = config.trust_proxy > 0 ? req.headers['x-forwarded-for'] : req.socket.remoteAddress.replace(/^.*:/, '');
     const reputation = JSON.parse(await checkReputation(ip, abuseipdbKey))
 
     if ("errors" in reputation) {
@@ -99,3 +102,4 @@ exports.new = async (req, res) => {
         });
     });
 };
+*/

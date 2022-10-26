@@ -6,6 +6,7 @@ class General extends Routes {
 
     constructor() {
         super()
+
         // General routes
         this.router = Router()
         this.router.get("/ip", (req, res) => res.send({ ip: req.ip }))

@@ -3,6 +3,9 @@ import { Logger } from "../utils/logger"
 import { PasteSchema } from "../schemas"
 import { Model, model } from "mongoose"
 import config from "../config"
+import { RequestHandler } from "express"
+
+type RequestParams = Parameters<RequestHandler>
 
 class Routes {
     criticalLogger?: Logger
@@ -39,7 +42,7 @@ class Routes {
         })
     }
 
-    async checkClientReputation(req, res) {
+    async checkClientReputation(req: RequestParams[0], res: RequestParams[1]) {
         if (!config.abuseipdb_key) return
 
         const reputation = JSON.parse(await checkReputation(req.ip, config.abuseipdb_key))
