@@ -1,23 +1,45 @@
-# pastebin.fi API specifications
+# PowerPaste API Specification
 
-The API follows [jsend](https://github.com/omniti-labs/jsend) specification. The responses are in [JSON](http://json.org/). Every response also contains a relevant status code. The general structure of data is following:
+-   The responses are in [JSON](http://json.org/).
 
-<table>
-<tr><th>Type</td><th>Description</th><th>Required Keys</th><th>Optional Keys</td></tr>
-<tr><td>success</td><td>All went well, and (usually) some data was returned.</td><td>status, data</td><td></td></tr>
-<tr><td>fail</td><td>There was a problem with the data submitted, or some pre-condition of the API call wasn't satisfied</td><td>status, data</td><td></td></tr>
-<tr><td>error</td><td>An error occurred in processing the request, i.e. an exception was thrown</td><td>status, message</td><td>code, data</td></tr>
-</table>
+-   Every response contains a relevant status code.
+-   The current production API is available at [https://api.pastebin.fi](https://api.pastebin.fi).
 
-The API is available at [https://api.pastebin.fi](https://api.pastebin.fi).
+## Error responses
 
-## Metrics
+Error responses are returned in following format, with status code set to any value between `400` and `599`
 
-### Sitewide
+```json
+{
+    "title": "error type",
+    "message": "more specific data of the error"
+}
+```
+
+### Additional fields
+
+In some cases additional fields are given in the error response. For example, when creating a new paste with existing paste's ID, the existing paste's ID is returned. The responses can look similar to below.
+
+```json
+{
+    "title": "some error",
+    "message": "blaah blaah",
+    "data": {
+        "pasteIdentifier": "existing paste ID"
+    }
+}
+```
+
+## General
+
+General endpoints are located in the API root.
+
+### `/metrics` - Show sitewide metrics data
 
 Endpoint: `/metrics`
 Method: `GET`
 Example response:
+
 ```json
 {
     "totalViews": 377534,
@@ -29,42 +51,37 @@ Example response:
 }
 ```
 
-### IP
+### `/ip ` - Public IP-address
 
 Endpoint: `/ip`
 Method: `GET`
 Example response:
+
 ```json
 {
     "ip": "185.204.1.182"
 }
 ```
 
+## Pastes - `/pastes`.
 
-## Pastes /pastes
+-   (For example `/create` endpoint can be found in `/pastes/create`. )
 
-Endpoint: `/pastes`
+### `POST /` Create a new paste
 
-### Create
+Example body:
 
+```json
+{
+    "paste": "hello there",
+    "title": "testiuploadi",
+    "language": "python",
+    "private": false
+}
+```
 
-### Get
+### `GET /:id` Get a paste by an ID
 
+Example request: `GET /pastes/0cfG2yS`
 
-### Filter
-
-----
-
-**!!EVERYTHING UNDER THIS LINE IS NOT IMPLEMENTED!!**
-
-----
-
-### Delete
-
-
-## Users
-
-### Register
-
-
-### Authenticate
+### `GET /` Filter from pastes

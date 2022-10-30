@@ -22,11 +22,6 @@ let sessionEnvironment = {
 
 function initExpressRouter() {
     const app = express()
-    const routes = new Routes()
-
-    app.use("/", new General().router)
-    app.use("/pastes", new Pastes().router)
-    app.use("/metrics", new Metrics().router)
 
     //TODO: don't use hardcoded values
     app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"])
@@ -35,6 +30,11 @@ function initExpressRouter() {
 
     app.use(urlencoded({ extended: true, limit: "10mb" }))
     app.use(json({ limit: "10mb" }))
+
+    new Routes()
+    app.use("/", new General().router)
+    app.use("/pastes", new Pastes().router)
+    app.use("/metrics", new Metrics().router)
 
     return app
 }
@@ -58,15 +58,13 @@ async function setupServer() {
         logger.log("Using secure cookies")
     }
 
-    logger.logBegin(`Connecting to database (mongo)...`)
     try {
         await connect(config.mongo_uri)
-        logger.log(`Database connected`)
+        logger.log(`Database connected (mongodb)`)
     } catch (err) {
         logger.error(err)
     }
 
-    logger.logBegin(`Starting server....`)
     initExpressRouter().listen(serverListenerProperties.port, async () =>
         logger.log(`Server listening at ${serverListenerProperties.display()}`)
     )

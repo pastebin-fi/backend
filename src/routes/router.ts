@@ -42,25 +42,26 @@ class Routes {
         })
     }
 
-    async checkClientReputation(req: RequestParams[0], res: RequestParams[1]) {
-        if (!config.abuseipdb_key) return
+    async checkClientReputation(req: RequestParams[0], res: RequestParams[1], next) {
+        if (config.abuseipdb_key) {
+            const reputation = JSON.parse(await checkReputation(req.ip, config.abuseipdb_key))
 
-        const reputation = JSON.parse(await checkReputation(req.ip, config.abuseipdb_key))
-
-        if ("errors" in reputation) {
-            reputation.errors.forEach((error: string) => {
-                this.logger?.error("AbuseIPDB", error)
-            })
-        } else {
-            if (reputation.data.abuseConfidenceScore > 60) {
-                return this.sendErrorResponse(
-                    res,
-                    403,
-                    "Pääsy hylätty",
-                    "IP-osoitteesi maine on huono, joten hylkäsimme pyyntösi uuden liitteen luomiseksi."
-                )
+            if ("errors" in reputation) {
+                reputation.errors.forEach((error: string) => {
+                    this.logger?.error("AbuseIPDB", error)
+                })
+            } else {
+                if (reputation.data.abuseConfidenceScore > 60) {
+                    return this.sendErrorResponse(
+                        res,
+                        403,
+                        "Pääsy hylätty",
+                        "IP-osoitteesi maine on huono, joten hylkäsimme pyyntösi uuden liitteen luomiseksi."
+                    )
+                }
             }
         }
+        next()
     }
 }
 

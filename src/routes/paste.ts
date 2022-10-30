@@ -18,7 +18,7 @@ class Pastes extends Routes {
         this.router = Router()
         this.router.post("/", 
             newPasteRateLimiter, 
-            this.checkClientReputation.bind(this), 
+            this.checkClientReputation.bind(this),
             this.newPaste.bind(this)
         ) // Create a new paste
         this.router.get("/:id", this.getPaste.bind(this)) // Get a specific paste
@@ -35,17 +35,30 @@ class Pastes extends Routes {
     }
 
     async newPaste(req: RequestParams[0], res: RequestParams[1]) {
-        if (req.body.paste === "") {
-            res.redirect("/")
-            return
-        }
+        const body = await req.body
+        if (!body)
+            return this.sendErrorResponse(
+                res, 
+                400, 
+                "Pyynnön vartalo on pakollinen", 
+                "Et voi luoda tyhjää pyyntöä."
+            )
 
-        const content = req.body.paste
-        const title = req.body.title
+        const content = body.paste
+        const title = body.title
         const size = Buffer.byteLength(content, "utf8")
-        const language = req.body.language ? req.body.language : "html"
+        const language = body.language ?? "text"
 
         // Run checks
+        if (!content) {
+            return this.sendErrorResponse(
+                res, 
+                400, 
+                "Sisältö on pakollinen", 
+                "Et voi luoda tyhjää liitettä."
+            )
+        }
+
         if (size > 10000000)
             return this.sendErrorResponse(
                 res,
@@ -83,7 +96,6 @@ class Pastes extends Routes {
         }
 
         const deletekey = makeid(64)
-
         const paste = {
             ip: req.ip,
             content,
@@ -103,12 +115,16 @@ class Pastes extends Routes {
 
         // await fs.writeFile(`${dataDir}/${hash}`, content);
         this.PasteModel.create(paste, (err, paste) => {
-            if (err) throw err
+            if (err) {
+                this.logger.log(err)
+                this.sendErrorResponse(res, 500, "Liitettä ei voitu luoda", "Jotain meni vikaan, eikä liitettä luotu.")
+            }
             this.logger.log(`${Date.now().toString()} - New paste created with id ${paste.id}`)
-            res.send({
-                id: paste.id,
-                delete: deletekey,
-            })
+        })
+
+        res.send({
+            id: paste.id,
+            delete: deletekey,
         })
     }
 
@@ -198,8 +214,11 @@ class Pastes extends Routes {
         ]
         if (!allowedSortings.includes(sorting)) sorting = "-meta.views"
 
-        let search = { hidden: false, $text: undefined }
         let score = {}
+        let search: {
+            hidden: boolean;
+            $text?: { $search: any }
+        } = { hidden: false }
         if (query) {
             score = { score: { $meta: "textScore" } }
             search.$text = { $search: query }
@@ -212,8 +231,8 @@ class Pastes extends Routes {
             .select("id title meta author date -_id")
             .lean()
             .exec((err, pastes) => {
-                if (!pastes) return res.send([])
                 if (err) this.logger.error(err)
+                if (!pastes) return res.send([])
 
                 res.send(pastes)
             })

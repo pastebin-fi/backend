@@ -10,7 +10,6 @@ export const makeid = (length) => {
 }
 
 // Consider also checking against ip2location proxy db lite
-
 // Example of a bad ip: 46.161.11.244
 export const checkReputation = async (ip, abuseipdbKey) => {
     const response = await fetch("https://api.abuseipdb.com/api/v2/check?maxAgeInDays=90&ipAddress=" + ip, {

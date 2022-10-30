@@ -1,5 +1,7 @@
+require("dotenv").config()
+
 export default {
-    mongo_uri: "mongodb+srv://api:Gb7jDMZw9FeUCAWx@cluster0.e8vvulx.mongodb.net/?retryWrites=true&w=majority",
+    mongo_uri: "",
     site_url: "http://127.0.0.1:8080",
     title: "Powerpaste",
     description: "The best pastebin service ever",
