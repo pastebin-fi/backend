@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-exports.PasteSchema = new Schema({
+const PasteSchema = new Schema({
     title: String,
     id: String,
-    author: { type: String, default: "Anonymous" },
+    author: { type: String, default: "Tuntematon lataaja" },
     ip: String,
     expiration: {
         type: Date,
@@ -29,7 +29,18 @@ exports.PasteSchema = new Schema({
     },
 });
 
-exports.UserSchema = new Schema({
+PasteSchema.index({
+    title: 'text',
+    content: 'text',
+}, {
+    name: 'Search index',
+    weights: {
+        title: 10,
+        content: 6
+    }
+});
+
+const UserSchema = new Schema({
     name: String,
     pwHash: String,
     pwSalt: String,
@@ -49,20 +60,10 @@ exports.UserSchema = new Schema({
     },
     followed: [String],
     favorites: [String],
-    roles: [String],
     banned: { 
         status: {type: Boolean, default: false},
         reason: {type: String, default: ""}
     },
 })
 
-this.PasteSchema.index({
-    title: 'text',
-    content: 'text',
-}, {
-    name: 'Search index',
-    weights: {
-        title: 10,
-        content: 6
-    }
-});
+export { PasteSchema, UserSchema }
