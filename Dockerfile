@@ -1,11 +1,16 @@
-FROM node:14
+FROM node:18-alpine3.17
 
 WORKDIR /app
 
-COPY . .
+COPY package*.json .
 
-RUN npm install
+RUN npm i 
 
-EXPOSE 3000
+COPY src/ .
+COPY tsconfig.json .
 
-CMD ["ts-node", "src"]
+RUN npx tsc --pretty --project .
+
+EXPOSE 8080
+
+CMD ["node", "target/app.js"]
