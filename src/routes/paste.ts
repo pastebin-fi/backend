@@ -16,8 +16,9 @@ class Pastes extends Routes {
         super()
 
         this.router = Router()
-        this.router.post("/", 
-            newPasteRateLimiter, 
+        this.router.post(
+            "/",
+            newPasteRateLimiter,
             this.checkClientReputation.bind(this),
             this.newPaste.bind(this)
         ) // Create a new paste
@@ -38,9 +39,9 @@ class Pastes extends Routes {
         const body = await req.body
         if (!body)
             return this.sendErrorResponse(
-                res, 
-                400, 
-                "Pyynnön vartalo on pakollinen", 
+                res,
+                400,
+                "Pyynnön vartalo on pakollinen",
                 "Et voi luoda tyhjää pyyntöä."
             )
 
@@ -51,12 +52,7 @@ class Pastes extends Routes {
 
         // Run checks
         if (!content) {
-            return this.sendErrorResponse(
-                res, 
-                400, 
-                "Sisältö on pakollinen", 
-                "Et voi luoda tyhjää liitettä."
-            )
+            return this.sendErrorResponse(res, 400, "Sisältö on pakollinen", "Et voi luoda tyhjää liitettä.")
         }
 
         if (size > 10000000)
@@ -75,12 +71,12 @@ class Pastes extends Routes {
                 "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
             )
 
-        if (language.length > 15)
+        if (language.length > 30)
             return this.sendErrorResponse(
                 res,
                 413,
                 "Virheellinen ohjelmointikieli",
-                "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (15) merkkiä."
+                "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (30) merkkiä."
             )
 
         const hash = sha256(content)
@@ -117,7 +113,12 @@ class Pastes extends Routes {
         this.PasteModel.create(paste, (err, paste) => {
             if (err) {
                 this.logger.log(err)
-                this.sendErrorResponse(res, 500, "Liitettä ei voitu luoda", "Jotain meni vikaan, eikä liitettä luotu.")
+                this.sendErrorResponse(
+                    res,
+                    500,
+                    "Liitettä ei voitu luoda",
+                    "Jotain meni vikaan, eikä liitettä luotu."
+                )
             }
             this.logger.log(`${Date.now().toString()} - New paste created with id ${paste.id}`)
         })
@@ -148,7 +149,10 @@ class Pastes extends Routes {
 
         if (paste.meta && !paste.meta.size) {
             paste.meta.size = Buffer.byteLength(paste.content || "", "utf8")
-            await this.PasteModel.findOneAndUpdate({ id: requestedId }, { $inc: { "meta.size": paste.meta.size } })
+            await this.PasteModel.findOneAndUpdate(
+                { id: requestedId },
+                { $inc: { "meta.size": paste.meta.size } }
+            )
         }
 
         if (paste.removed?.isRemoved) {
@@ -196,7 +200,7 @@ class Pastes extends Routes {
         let query = varOrDefault(req.query.q, "")
         let offset = varOrDefault(req.query.offset, 0)
         let limit = varOrDefault(req.query.limit, 10)
-        let sorting = varOrDefault(req.query.sorting, "-meta-views") 
+        let sorting = varOrDefault(req.query.sorting, "-meta-views")
 
         // Do not allow too many pastes
         limit = limit > 30 ? 30 : limit
@@ -216,7 +220,7 @@ class Pastes extends Routes {
 
         let score = {}
         let search: {
-            hidden: boolean;
+            hidden: boolean
             $text?: { $search: any }
         } = { hidden: false }
         if (query) {
