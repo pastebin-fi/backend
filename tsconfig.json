@@ -1,8 +1,10 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "moduleResolution": "node"
-  },
-  "include": ["/**/*.ts"],
-  "exclude": ["node_modules"]
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "outDir": "target",
+        "esModuleInterop": true,
+        "moduleResolution": "node"
+    },
+    "include": ["/**/*.ts"],
+    "exclude": ["node_modules"]
 }
