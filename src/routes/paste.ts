@@ -200,7 +200,7 @@ class Pastes extends Routes {
         let query = varOrDefault(req.query.q, "")
         let offset = varOrDefault(req.query.offset, 0)
         let limit = varOrDefault(req.query.limit, 10)
-        let sorting = varOrDefault(req.query.sorting, "-meta-views")
+        let sorting = varOrDefault(req.query.sorting, "-date")
 
         // Do not allow too many pastes
         limit = limit > 30 ? 30 : limit
@@ -212,11 +212,8 @@ class Pastes extends Routes {
             "meta.views",
             "-meta.size",
             "meta.size",
-            "-meta.votes",
-            "meta.votes",
-            "-meta.favs",
         ]
-        if (!allowedSortings.includes(sorting)) sorting = "-meta.views"
+        if (!allowedSortings.includes(sorting)) sorting = "-date"
 
         let score = {}
         let search: {
