@@ -1,0 +1,237 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pastebin.fi API",
+    "description": "This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about\nSwagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!\nYou can now help us improve the API whether it's by making changes to the definition itself or to the code.\nThat way, with time, we can improve the API in general, and expose some of the new features in OAS3.\n\n_If you're looking for the Swagger 2.0/OAS 2.0 version of Petstore, then click [here](https://editor.swagger.io/?url=https://petstore.swagger.io/v2/swagger.yaml). Alternatively, you can load via the `Edit > Load Petstore OAS 2.0` menu option!_\n\nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)",
+    "termsOfService": "https://pastebin.fi/about",
+    "contact": {
+      "email": "sysadmin@pastebin.fi"
+    },
+    "license": {
+      "name": "AGPL-3.0",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.pastebin.fi"
+    }
+  ],
+  "tags": [
+    {
+      "name": "paste",
+      "description": "Requests related to pastes"
+    }
+  ],
+  "paths": {
+    "/pastes": {
+      "get": {
+        "tags": [
+          "paste"
+        ],
+        "summary": "Get list of public pastes",
+        "description": "Get list of public pastes",
+        "operationId": "listPastes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search for the following text in title and paste (keep in mind that the title is weighted)"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "The number of pastes to skip before starting to collect the result set"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "maximum": 30
+            },
+            "description": "The amount of pastes that are returned in the result set."
+          },
+          {
+            "in": "query",
+            "name": "sorting",
+            "schema": {
+              "type": "string",
+              "default": "-date",
+              "enum": [
+                "date",
+                "-date",
+                "meta.views",
+                "-meta.views",
+                "meta.size",
+                "-meta.size"
+              ]
+            },
+            "description": "Sort the results from mongodb with the following method. Hyphen (-) in front of the value switch the sorting to descending order (normally ascending). Has to match the available values or else set to default value."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paste list found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasteList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        }
+      }
+    },
+    "/pastes/{id}": {
+      "get": {
+        "tags": [
+          "paste"
+        ],
+        "summary": "Get paste",
+        "description": "Get paste and its metadata (views & size)",
+        "operationId": "getPaste",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The paste ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paste found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paste"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Paste not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PasteList": {
+        "required": [
+          "views",
+          "size"
+        ],
+        "type": "object",
+        "properties": {
+          "votes": {
+            "type": "integer",
+            "example": 0
+          },
+          "favs": {
+            "type": "integer",
+            "example": 0
+          },
+          "views": {
+            "type": "integer",
+            "example": 1
+          },
+          "size": {
+            "type": "integer",
+            "example": 109
+          }
+        }
+      },
+      "Paste": {
+        "required": [
+          "meta",
+          "title",
+          "id",
+          "hidden",
+          "date"
+        ],
+        "type": "object",
+        "properties": {
+          "meta": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PasteMeta"
+            }
+          },
+          "title": {
+            "type": "string",
+            "example": "Example title"
+          },
+          "id": {
+            "type": "string",
+            "example": "58hMQlk"
+          },
+          "hidden": {
+            "type": "boolean",
+            "example": true
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-03T11:19:20.137Z"
+          }
+        }
+      },
+      "PasteMeta": {
+        "required": [
+          "views",
+          "size"
+        ],
+        "type": "object",
+        "properties": {
+          "votes": {
+            "type": "integer",
+            "example": 0
+          },
+          "favs": {
+            "type": "integer",
+            "example": 0
+          },
+          "views": {
+            "type": "integer",
+            "example": 1
+          },
+          "size": {
+            "type": "integer",
+            "example": 109
+          }
+        }
+      }
+    }
+  }
+}

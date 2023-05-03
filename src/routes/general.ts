@@ -10,7 +10,7 @@ class General extends Routes {
         // General routes
         this.router = Router()
         this.router.get("/ip", (req, res) => res.send({ ip: req.ip }))
-        this.router.get("/", (_, res) => res.send({ status: "up" }))
+        this.router.get("/", (_, res) => res.send({ status: "up", info: "Go see documentation at /docs" }))
     }
 }
 

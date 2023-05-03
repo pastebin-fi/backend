@@ -1,13 +1,16 @@
 import express, { urlencoded, json } from "express"
 import session from "express-session"
+import { readFileSync } from "fs"
+import swaggerUi from 'swagger-ui-express'
 import { connect } from "mongoose"
-
 import { Logger } from "./utils/logger"
 import config from "./config"
 import Pastes from "./routes/paste"
 import { General } from "./routes/general"
 import { Metrics } from "./routes/metrics"
 import { Routes } from "./routes/router"
+
+const swaggerDocument: object = JSON.parse(readFileSync("./openapi.json", 'utf8'))
 
 const logger = new Logger(true, true)
 
@@ -35,6 +38,11 @@ function initExpressRouter() {
     app.use("/", new General().router)
     app.use("/pastes", new Pastes().router)
     app.use("/metrics", new Metrics().router)
+
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+        explorer: true,
+        customCss: '.swagger-ui .topbar { display: none }'
+    }));
 
     return app
 }
