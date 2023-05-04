@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Pastebin.fi API",
-    "description": "This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about\nSwagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!\nYou can now help us improve the API whether it's by making changes to the definition itself or to the code.\nThat way, with time, we can improve the API in general, and expose some of the new features in OAS3.\n\n_If you're looking for the Swagger 2.0/OAS 2.0 version of Petstore, then click [here](https://editor.swagger.io/?url=https://petstore.swagger.io/v2/swagger.yaml). Alternatively, you can load via the `Edit > Load Petstore OAS 2.0` menu option!_\n\nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)",
+    "description": "Some endpoints might return more fields than are specified in this document. They are not supposed to be used by public until they are added to this document (since they are mostly for testing and can be removed at any point of time).\n\nUseful resources:\n- [Pastebin.fi API backend code](https://github.com/pastebin-fi/PowerPaste)\n- [Official frontend for pastebin.fi API](https://github.com/pastebin-fi/frontend)",
     "termsOfService": "https://pastebin.fi/about",
     "contact": {
       "email": "sysadmin@pastebin.fi"
@@ -22,9 +22,49 @@
     {
       "name": "paste",
       "description": "Requests related to pastes"
+    },
+    {
+      "name": "metrics",
+      "description": "Requestes related to metrics"
     }
   ],
   "paths": {
+    "/metrics": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Get metrics",
+        "description": "Get public metrics of the service in JSON format",
+        "operationId": "getMetrics",
+        "responses": {
+          "200": {
+            "description": "JSON object containing metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No metrics available (no pastes created / database query failed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "title": "Liitteitä ei löytynyt",
+                  "message": "Emme ole vastaanottaneet vielä yhtäkään liitettä. Ole ensimmäinen!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pastes": {
       "get": {
         "tags": [
@@ -100,6 +140,23 @@
             "description": "Validation exception"
           }
         }
+      },
+      "post": {
+        "tags": [
+          "paste"
+        ],
+        "requestBody": {
+          "description": "Optional description in *Markdown*",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        },
+        "responses": null
       }
     },
     "/pastes/{id}": {
@@ -132,11 +189,19 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
           "404": {
-            "description": "Paste not found"
+            "description": "Paste not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "title": "Liitettä ei löytynyt",
+                  "message": "Olemme pahoillamme, mutta hakemaasi liitettä ei löytynyt"
+                }
+              }
+            }
           },
           "405": {
             "description": "Validation exception"
@@ -229,6 +294,69 @@
           "size": {
             "type": "integer",
             "example": 109
+          }
+        }
+      },
+      "ErrorResponse": {
+        "required": [
+          "title",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "error type",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "example": "",
+            "description": "More specific data of the error"
+          },
+          "data": {
+            "type": "object",
+            "description": "In some cases additional fields are given in the error response",
+            "properties": {
+              "pasteIdentifier": {
+                "type": "string",
+                "description": "existing paste ID"
+              }
+            }
+          }
+        }
+      },
+      "MetricsResponse": {
+        "required": [
+          "totalViews",
+          "pasteCount - total - public - private"
+        ],
+        "type": "object",
+        "properties": {
+          "totalviews": {
+            "type": "integer",
+            "example": 138953,
+            "description": "Sum of all paste views"
+          },
+          "pasteCount": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Amount of all pastes (both public and private)",
+                "example": 1557
+              },
+              "public": {
+                "type": "integer",
+                "description": "Amount of public pastes",
+                "example": 1129
+              },
+              "private": {
+                "type": "integer",
+                "description": "Amount of private pastes",
+                "example": 428
+              }
+            }
           }
         }
       }
