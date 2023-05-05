@@ -33,7 +33,7 @@ class Routes {
         status: number,
         title: string,
         message: string,
-        additionalfields?: {}[]
+        additionalfields?: {}
     ) {
         return res.status(status).send({
             title: title,

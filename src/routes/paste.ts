@@ -87,7 +87,7 @@ class Pastes extends Routes {
                 409,
                 "Liite on jo olemassa",
                 "Luotu liite on jo olemassa, joten sitä ei luotu.",
-                [{ pasteIdentifier: existingPasteID }]
+                { pasteIdentifier: existingPasteID }
             )
         }
 

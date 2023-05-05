@@ -189,6 +189,23 @@
               }
             }
           },
+          "409": {
+            "description": "The same content is in another paste",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "title": "Liite on jo olemassa",
+                  "description": "Luotu liite on jo olemassa, joten sitä ei luotu.",
+                  "data": {
+                    "pasteIdentifier": "Daehn4t"
+                  }
+                }
+              }
+            }
+          },
           "413": {
             "description": "Exceeds limits defined by server\n\nLimits:\n  - Programming language must be under 30 characters\n  - Paste size must be under 10 MB (Megabytes)\n  - Title must be under 300 characters\n",
             "content": {
