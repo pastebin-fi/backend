@@ -129,15 +129,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
-          },
-          "405": {
-            "description": "Validation exception"
           }
         }
       },
@@ -213,28 +204,160 @@
   "components": {
     "schemas": {
       "PasteList": {
-        "required": [
-          "views",
-          "size"
-        ],
-        "type": "object",
-        "properties": {
-          "votes": {
-            "type": "integer",
-            "example": 0
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Paste title"
+            },
+            "id": {
+              "type": "string",
+              "description": "Paste ID (very useful for querying it later)"
+            },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "views": {
+                  "type": "integer",
+                  "description": "Amount of page loads the paste has received"
+                },
+                "size": {
+                  "type": "integer",
+                  "format": "byte",
+                  "description": "Size in bytes"
+                }
+              }
+            },
+            "date": {
+              "type": "string",
+              "format": "datetime",
+              "description": "Time when paste was created"
+            }
           },
-          "favs": {
-            "type": "integer",
-            "example": 0
-          },
-          "views": {
-            "type": "integer",
-            "example": 1
-          },
-          "size": {
-            "type": "integer",
-            "example": 109
-          }
+          "example": [
+            {
+              "title": "jamsanseutu.fi - 2000009558326 - Maksumuuri poistettu",
+              "id": "GOtkjL0",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 2,
+                "size": 1929
+              },
+              "date": "2023-05-05T05:58:52.590Z"
+            },
+            {
+              "title": "jamsanseutu.fi - 2000009560587 - Maksumuuri poistettu",
+              "id": "MOaY1Ux",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 4,
+                "size": 7064
+              },
+              "date": "2023-05-05T05:49:57.027Z"
+            },
+            {
+              "title": "Ecoshift Corp, LED Tube Lights Manila Philippines",
+              "id": "fgJRrSP",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 7,
+                "size": 359
+              },
+              "date": "2023-05-04T11:00:18.642Z"
+            },
+            {
+              "title": "hs.fi - 2000009511830 - Maksumuuri poistettu",
+              "id": "WQ9LqBe",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 16,
+                "size": 16650
+              },
+              "date": "2023-05-03T07:32:11.872Z"
+            },
+            {
+              "title": "LinkHelpers Phoenix Digital Marketing",
+              "id": "1uw3d0o",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 12,
+                "size": 506
+              },
+              "date": "2023-05-03T06:15:41.181Z"
+            },
+            {
+              "title": "aamulehti.fi - 2000008948411 - Maksumuuri poistettu",
+              "id": "RDmebqX",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 12,
+                "size": 3382
+              },
+              "date": "2023-05-02T12:51:29.109Z"
+            },
+            {
+              "title": "AI Monthly SEO plans",
+              "id": "IZs1kdC",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 11,
+                "size": 398
+              },
+              "date": "2023-05-02T05:31:15.515Z"
+            },
+            {
+              "title": "Improve local visibility for pastebin.fi",
+              "id": "3iNenOB",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 11,
+                "size": 440
+              },
+              "date": "2023-04-30T12:52:16.058Z"
+            },
+            {
+              "title": "hs.fi - 2000009514770 - Maksumuuri poistettu",
+              "id": "rVTg2Qv",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 23,
+                "size": 37275
+              },
+              "date": "2023-04-30T11:46:01.626Z"
+            },
+            {
+              "title": "",
+              "id": "HRvvPWw",
+              "author": "Tuntematon lataaja",
+              "meta": {
+                "votes": null,
+                "favs": null,
+                "views": 23,
+                "size": 1209
+              },
+              "date": "2023-04-29T12:24:03.176Z"
+            }
+          ]
         }
       },
       "Paste": {
@@ -279,21 +402,16 @@
         ],
         "type": "object",
         "properties": {
-          "votes": {
-            "type": "integer",
-            "example": 0
-          },
-          "favs": {
-            "type": "integer",
-            "example": 0
-          },
           "views": {
             "type": "integer",
-            "example": 1
+            "example": 1,
+            "description": "Amount of page loads the paste has received"
           },
           "size": {
             "type": "integer",
-            "example": 109
+            "format": "byte",
+            "example": 109,
+            "description": "Size in bytes"
           }
         }
       },
