@@ -15,7 +15,8 @@
   },
   "servers": [
     {
-      "url": "https://api.pastebin.fi"
+      "url": "https://api.pastebin.fi",
+      "description": "Production server (uses live data)"
     }
   ],
   "tags": [
@@ -125,7 +126,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PasteList"
+                  "$ref": "#/components/schemas/PasteListResponse"
                 }
               }
             }
@@ -136,18 +137,106 @@
         "tags": [
           "paste"
         ],
+        "summary": "Create a paste",
+        "description": "This endpoint is ratelimited to 20 pastes per 30 mins (this might change in the future when accounts come).",
         "requestBody": {
           "description": "Optional description in *Markdown*",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Pet"
+                "$ref": "#/components/schemas/PasteCreateRequest"
               }
             }
           }
         },
-        "responses": null
+        "responses": {
+          "200": {
+            "description": "Paste has been created succesfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasteCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "title": "Pyynnön vartalo on pakollinen",
+                  "message": "Et voi luoda tyhjää pyyntöä."
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Blocked by safeguards\n\nCurrent safeguards:\n  - AbuseIPDB check\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "title": "Pääsy hylätty",
+                  "message": "IP-osoitteesi maine on huono, joten hylkäsimme pyyntösi uuden liitteen luomiseksi."
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Exceeds limits defined by server\n\nLimits:\n  - Programming language must be under 30 characters\n  - Paste size must be under 10 MB (Megabytes)\n  - Title must be under 300 characters\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "large": {
+                    "summary": "Over 10MB pastes are not allowed",
+                    "value": {
+                      "title": "Liite on liian iso",
+                      "message": "Palveluun ei voi luoda yli kymmenen (10) MB liitteitä."
+                    }
+                  },
+                  "name": {
+                    "summary": "Names over 300 characters are disallowed",
+                    "value": {
+                      "title": "Virheellinen nimi",
+                      "message": "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
+                    }
+                  },
+                  "language": {
+                    "summary": "Programming language names over 30 characters are disallowed",
+                    "value": {
+                      "title": "Virheellinen ohjelmointikieli",
+                      "message": "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (30) merkkiä."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unknown error occurred when creating the paste (database connection might have broken)\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "title": "Liitettä ei voitu luoda",
+                  "description": "Jotain meni vikaan, eikä liitettä luotu."
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/pastes/{id}": {
@@ -175,7 +264,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Paste"
+                  "$ref": "#/components/schemas/PasteResponse"
                 }
               }
             }
@@ -193,9 +282,6 @@
                 }
               }
             }
-          },
-          "405": {
-            "description": "Validation exception"
           }
         }
       }
@@ -203,7 +289,7 @@
   },
   "components": {
     "schemas": {
-      "PasteList": {
+      "PasteListResponse": {
         "type": "array",
         "items": {
           "type": "object",
@@ -360,7 +446,71 @@
           ]
         }
       },
-      "Paste": {
+      "PasteCreateRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "paste"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Placeholder text",
+            "description": "Paste title"
+          },
+          "paste": {
+            "type": "string",
+            "example": "Lorem ipsum dolor sit amet...",
+            "description": "Paste content"
+          },
+          "language": {
+            "type": "string",
+            "default": "text",
+            "example": "python",
+            "description": "Paste programming langauge (currently not used anywhere)"
+          },
+          "private": {
+            "type": "boolean",
+            "default": false,
+            "example": true,
+            "description": "Do not show the paste to others (only the ones that have access to the ID can see it)"
+          }
+        }
+      },
+      "PasteCreateResponse": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "Placeholder text",
+            "description": "Paste identifier can be used for a redirect to the paste when created"
+          }
+        }
+      },
+      "PasteMeta": {
+        "required": [
+          "views",
+          "size"
+        ],
+        "type": "object",
+        "properties": {
+          "views": {
+            "type": "integer",
+            "example": 1,
+            "description": "Amount of page loads the paste has received"
+          },
+          "size": {
+            "type": "integer",
+            "format": "byte",
+            "example": 109,
+            "description": "Size in bytes"
+          }
+        }
+      },
+      "PasteResponse": {
         "required": [
           "meta",
           "title",
@@ -392,26 +542,6 @@
             "type": "string",
             "format": "date-time",
             "example": "2023-05-03T11:19:20.137Z"
-          }
-        }
-      },
-      "PasteMeta": {
-        "required": [
-          "views",
-          "size"
-        ],
-        "type": "object",
-        "properties": {
-          "views": {
-            "type": "integer",
-            "example": 1,
-            "description": "Amount of page loads the paste has received"
-          },
-          "size": {
-            "type": "integer",
-            "format": "byte",
-            "example": 109,
-            "description": "Size in bytes"
           }
         }
       },
