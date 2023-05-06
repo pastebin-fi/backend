@@ -37,7 +37,7 @@ class Pastes extends Routes {
 
     async newPaste(req: RequestParams[0], res: RequestParams[1]) {
         const body = await req.body
-        if (!body)
+        if (!body || !body.paste)
             return this.sendErrorResponse(
                 res,
                 400,

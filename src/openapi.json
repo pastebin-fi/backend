@@ -140,7 +140,6 @@
         "summary": "Create a paste",
         "description": "This endpoint is ratelimited to 20 pastes per 30 mins (this might change in the future when accounts come).",
         "requestBody": {
-          "description": "Optional description in *Markdown*",
           "required": true,
           "content": {
             "application/json": {

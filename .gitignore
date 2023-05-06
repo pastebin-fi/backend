@@ -1,6 +1,7 @@
 data
 .DS_Store
 .vscode
+*.js
 
 # Logs
 logs

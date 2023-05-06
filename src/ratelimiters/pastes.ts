@@ -4,8 +4,10 @@ import rateLimit from "express-rate-limit"
 export const newPasteRateLimiter = rateLimit({
     windowMs: 30 * 60 * 1000,
     max: 20,
-    message:
-        "Liian monta liitettä on luotu IP-osoitteestasi. Kokeile myöhemmin uudelleen.",
+    message: {
+        title: "IP-osoitetta on rajoitettu",
+        message: "Liian monta liitettä on luotu IP-osoitteestasi. Kokeile myöhemmin uudelleen."
+    },
     standardHeaders: true,
     legacyHeaders: false,
 })
