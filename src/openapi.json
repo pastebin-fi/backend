@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Pastebin.fi API",
-    "description": "Some endpoints might return more fields than are specified in this document. They are not supposed to be used by public until they are added to this document (since they are mostly for testing and can be removed at any point of time).\n\nUseful resources:\n- [Pastebin.fi API backend code](https://github.com/pastebin-fi/PowerPaste)\n- [Official frontend for pastebin.fi API](https://github.com/pastebin-fi/frontend)",
+    "description": "Some endpoints might return more fields than are specified in this document. They are not supposed to be used by public until they are added to this document (since they are mostly for testing and can be removed at any point of time).\n\nUseful resources:\n- [Pastebin.fi API backend code](https://github.com/pastebin-fi/backend)\n- [Official frontend for pastebin.fi API](https://github.com/pastebin-fi/frontend)",
     "termsOfService": "https://pastebin.fi/about",
     "contact": {
       "email": "sysadmin@pastebin.fi"

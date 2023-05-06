@@ -6,7 +6,7 @@ Documentation for the API can be viewed at [api.pastebin.fi/docs](https://api.pa
 
 ## Deployment
 
-Docker image is automatically built to [github content registry](https://github.com/pastebin-fi/PowerPaste/pkgs/container/powerpaste) from master branch. The same image is also automatically pulled with watchtower to the server (polling interval is 10 seconds).
+Docker image is automatically built to [github content registry](https://github.com/pastebin-fi/backend/pkgs/container/backend) from master branch. The same image is also automatically pulled with watchtower to the server (polling interval is 10 seconds).
 
 ## Stack
 
@@ -45,7 +45,5 @@ Since the project uses typescript you cannot just start the project with `node .
 | --- | ----------- |
 | mongo_uri | Example: `mongodb+srv://user:pass@host/database`. This is the URI that MongoDB tries to connect to. It should be in format `mongodb+src://<user>:<password>@<hostname>/<database>` |
 | site_url | Example: `http://localhost:3000`. The app parser required info from it. |
-| title | Defines the site title. |
-| description | Describe your pastebin. Visible in some places. |
 | trust_proxy | Number of proxies to trust (handy when using reverse proxy). |
 | secret | Should be something random and unique. |

@@ -1,19 +1,19 @@
 {
-  "name": "powerpaste",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "Best pastebin software ever",
+  "description": "API for pastebin.fi",
   "main": "app.js",
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pastebin-fi/PowerPaste.git"
+    "url": "git+https://github.com/pastebin-fi/backend.git"
   },
   "author": "pastebin.fi",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/pastebin-fi/PowerPaste/issues"
+    "url": "https://github.com/pastebin-fi/backend/issues"
   },
-  "homepage": "https://github.com/pastebin-fi/PowerPaste#readme",
+  "homepage": "https://github.com/pastebin-fi/backend#readme",
   "dependencies": {
     "dotenv": "^10.0.0",
     "ejs": "^3.1.6",

@@ -1,8 +1,6 @@
 export default {
     mongo_uri: process.env.MONGO_URI || "mongodb://<username>:<password>@<host>/<...>",
     site_url: process.env.SITE_URL || "http://127.0.0.1",
-    title: process.env.TITLE || "Powerpaste",
-    description: "The best pastebin service ever",
     trust_proxy: process.env.TRUST_PROXY || 0,
     secret: process.env.SECRET || "keyboard cat",
     abuseipdb_key: process.env.ABUSEIPDB_KEY || "",
