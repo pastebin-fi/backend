@@ -120,7 +120,7 @@ class Pastes extends Routes {
                     "Jotain meni vikaan, eikä liitettä luotu."
                 )
             }
-            this.logger.log(`${Date.now().toString()} - New paste created with id ${paste.id}`)
+            this.logger.log(`${req.ip} - ${Date.now().toString()} - New paste created with id ${paste.id}`)
         })
 
         res.send({
