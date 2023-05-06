@@ -31,7 +31,10 @@ First of all, you should setup the environment variables (see [here](#Configurat
 
 First install required packages with `npm install`. 
 
-Then cd into the project code directory `cd src`.
+You need two terminals for development:
+
+1. `npx tsc -w` (this watches the code and recompiles it on every change to `./target` dir)
+2. `nodemon app.js` (this command must be ran inside `./target` dir; you might need to copy the openapi.json file to `./target` dir also)
 
 Since the project uses typescript you cannot just start the project with `node .`, but have to use `npx tsc app` (accept the typescript install prompt if present).
 
