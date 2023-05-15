@@ -192,11 +192,10 @@ class Pastes extends Routes {
 
     async filterPastes(req: RequestParams[0], res: RequestParams[1]) {
         function varOrDefault(var1, var2) {
-            if (typeof var1 !== typeof var2) return var2
+            if (!var1) return var2
             else return var1
         }
 
-        // TODO: Highlight the search result for client. || can be done on the client side
         let query = varOrDefault(req.query.q, "")
         let offset = varOrDefault(req.query.offset, 0)
         let limit = varOrDefault(req.query.limit, 10)
@@ -205,14 +204,7 @@ class Pastes extends Routes {
         // Do not allow too many pastes
         limit = limit > 30 ? 30 : limit
 
-        const allowedSortings = [
-            "-date",
-            "date",
-            "-meta.views",
-            "meta.views",
-            "-meta.size",
-            "meta.size",
-        ]
+        const allowedSortings = ["-date", "date", "-meta.views", "meta.views", "-meta.size", "meta.size"]
         if (!allowedSortings.includes(sorting)) sorting = "-date"
 
         let score = {}
