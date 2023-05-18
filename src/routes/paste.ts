@@ -106,7 +106,7 @@ class Pastes extends Routes {
             title: title,
             id: makeid(7),
             hidden: req.body.private == true ? true : false,
-            programmingLanguage: language,
+            language: language,
             sha256: hash,
             meta: {
                 votes: null,
@@ -169,7 +169,7 @@ class Pastes extends Routes {
 
         // Filter out unwanted data (ip address, removal and so on...)
         const allowedKeys = [
-            "programmingLanguage",
+            "language",
             "hidden",
             "id",
             "content",

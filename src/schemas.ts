@@ -14,7 +14,7 @@ const PasteSchema = new Schema({
     sha256: String,
     deletekey: String,
     content: String,
-    programmingLanguage: String,
+    language: String,
     date: { type: Date, default: Date.now },
     hidden: Boolean,
     meta: {
