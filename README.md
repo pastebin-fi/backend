@@ -23,6 +23,23 @@ S3 has been tried as a storage but it had following problems:
 - Wasabi had some hiccups from time to time (requests did not finish), but this could be caused by the free trial.
 - I had no easy to provide full text search to paste content
 
+Creating & viewing a paste looks like this (currently the whole LangAPI implementation is missing).
+
+![```seqdiag {
+  frontend  -> API [label = "POST /pastes"];
+  API  -> LangAPI [label = "POST / (detect language)"];
+  API <-- LangAPI [label = "{ lang: python }"];
+  API -> MongoDB [label = "save paste & lang"];
+  API <-- MongoDB [label = "return success"];
+  frontend <-- API [label = "return success"];
+  frontend -> API [label = "GET /pastes/:id"];
+  API -> MongoDB [label = "get paste w/ metadata"];
+  API <-- MongoDB [label = "return raw content"];
+  API -> LangAPI [label = "MISSING POST / (content)", color = red];
+  API <-- LangAPI [label = "MISSING retun html", color = red];
+  frontend <-- API [label = "return content w/ highlight.js highlight"];
+}```](https://kroki.io/seqdiag/svg/eNqNkV9LwzAUxd_9FIc-iANr3-cfUJRRcDqob-JD1lzTSpbO5NYhY9_dpHSbpcX6kIeQ37n3nBNHn7IUCtsT4N1WhslIIL7B7SLFqxZL0rhGtHjOXpCshWNy0dulh8N74B6FUUMsziQx5QztgVoomhx1V3E8oNs26BTrby4qg92R92vmlVHV_d0v3IkvQuMIp42yO78vsMS1NXB1npNrUxwiB0nXzp94r6DZw6GfZFrKEe-KuLW-SbAiFlKw-Kd_KzbIGxvc2dIvdJ5mWfo0w_5DWtUkOvcDdGU9Y0mO_Mp-SNhuUPBKD8jHa2x3h7xFqQrtD198uOMlZNn9AJvHxes=)
+
 ## Setup
 
 First of all, you should setup the environment variables (see [here](#Configuration-variables)). I would recommend to copy the `.env.example` file to `.env` (command is `cp .env.example .env`).
