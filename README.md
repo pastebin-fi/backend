@@ -25,7 +25,7 @@ S3 has been tried as a storage but it had following problems:
 
 Creating & viewing a paste looks like this (currently the whole LangAPI implementation is missing).
 
-![```seqdiag {
+<!-- ![```seqdiag {
   frontend  -> API [label = "POST /pastes"];
   API  -> LangAPI [label = "POST / (detect language)"];
   API <-- LangAPI [label = "{ lang: python }"];
@@ -38,7 +38,7 @@ Creating & viewing a paste looks like this (currently the whole LangAPI implemen
   API -> LangAPI [label = "MISSING POST / (content)", color = red];
   API <-- LangAPI [label = "MISSING retun html", color = red];
   frontend <-- API [label = "return content w/ highlight.js highlight"];
-}```](https://kroki.io/seqdiag/svg/eNqNkV9LwzAUxd_9FIc-iANr3-cfUJRRcDqob-JD1lzTSpbO5NYhY9_dpHSbpcX6kIeQ37n3nBNHn7IUCtsT4N1WhslIIL7B7SLFqxZL0rhGtHjOXpCshWNy0dulh8N74B6FUUMsziQx5QztgVoomhx1V3E8oNs26BTrby4qg92R92vmlVHV_d0v3IkvQuMIp42yO78vsMS1NXB1npNrUxwiB0nXzp94r6DZw6GfZFrKEe-KuLW-SbAiFlKw-Kd_KzbIGxvc2dIvdJ5mWfo0w_5DWtUkOvcDdGU9Y0mO_Mp-SNhuUPBKD8jHa2x3h7xFqQrtD198uOMlZNn9AJvHxes=)
+}```](https://kroki.io/seqdiag/svg/eNqNkV9LwzAUxd_9FIc-iANr3-cfUJRRcDqob-JD1lzTSpbO5NYhY9_dpHSbpcX6kIeQ37n3nBNHn7IUCtsT4N1WhslIIL7B7SLFqxZL0rhGtHjOXpCshWNy0dulh8N74B6FUUMsziQx5QztgVoomhx1V3E8oNs26BTrby4qg92R92vmlVHV_d0v3IkvQuMIp42yO78vsMS1NXB1npNrUxwiB0nXzp94r6DZw6GfZFrKEe-KuLW-SbAiFlKw-Kd_KzbIGxvc2dIvdJ5mWfo0w_5DWtUkOvcDdGU9Y0mO_Mp-SNhuUPBKD8jHa2x3h7xFqQrtD198uOMlZNn9AJvHxes=) -->
 
 ## Setup
 

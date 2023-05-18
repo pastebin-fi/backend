@@ -1,11 +1,14 @@
 import { sha256 } from "js-sha256"
 import { readFile } from "fs/promises"
 import { RequestHandler, Router } from "express"
+import { ModelOperations } from "@vscode/vscode-languagedetection";
 
 import config from "../config"
 import { newPasteRateLimiter } from "../ratelimiters/pastes"
 import { makeid } from "../helpers"
 import { Routes } from "./router"
+
+const modulOperations = new ModelOperations();
 
 type RequestParams = Parameters<RequestHandler>
 
@@ -48,7 +51,6 @@ class Pastes extends Routes {
         const content = body.paste
         const title = body.title
         const size = Buffer.byteLength(content, "utf8")
-        const language = body.language ?? "text"
 
         // Run checks
         if (!content) {
@@ -71,15 +73,20 @@ class Pastes extends Routes {
                 "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
             )
 
-        if (language.length > 30)
-            return this.sendErrorResponse(
-                res,
-                413,
-                "Virheellinen ohjelmointikieli",
-                "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (30) merkkiä."
-            )
-
         const hash = sha256(content)
+        const language_guesses = await modulOperations.runModel(content);
+
+        // most likely returned when paste is under 20 chars
+        // or no programming language
+        let language = "plaintext";
+
+        if (language_guesses.length > 0 && language_guesses[0].confidence > 0.1) {
+            language = language_guesses[0].languageId;
+        }
+
+        console.log(language_guesses)
+        console.log(language);
+
         if (await this.PasteModel.exists({ sha256: hash })) {
             const existingPasteID = (await this.PasteModel.findOne({ sha256: hash }).select("id -_id"))?.id
             return this.sendErrorResponse(
@@ -126,6 +133,7 @@ class Pastes extends Routes {
         res.send({
             id: paste.id,
             delete: deletekey,
+            language
         })
     }
 
