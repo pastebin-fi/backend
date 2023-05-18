@@ -496,13 +496,20 @@
       "PasteCreateResponse": {
         "type": "object",
         "required": [
-          "id"
+          "id",
+          "language"
         ],
         "properties": {
           "id": {
             "type": "string",
             "example": "Placeholder text",
             "description": "Paste identifier can be used for a redirect to the paste when created"
+          },
+          "language": {
+            "type": "string",
+            "example": "ts",
+            "default": "plaintext",
+            "description": "Paste programming language reported by [vscode-languagedetection](https://github.com/microsoft/vscode-languagedetection) (that uses [yoeo/guesslang](https://github.com/yoeo/guesslang) model). Language is plaintext when the paste content is under 20 characters or the confidence is under 0.1."
           }
         }
       },
@@ -532,7 +539,8 @@
           "title",
           "id",
           "hidden",
-          "date"
+          "date",
+          "language"
         ],
         "type": "object",
         "properties": {
@@ -558,6 +566,12 @@
             "type": "string",
             "format": "date-time",
             "example": "2023-05-03T11:19:20.137Z"
+          },
+          "language": {
+            "type": "string",
+            "example": "ts",
+            "default": "plaintext",
+            "description": "Paste programming language reported by [vscode-languagedetection](https://github.com/microsoft/vscode-languagedetection) (that uses [yoeo/guesslang](https://github.com/yoeo/guesslang) model). Language is plaintext when the paste content is under 20 characters or the confidence is under 0.1."
           }
         }
       },
