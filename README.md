@@ -1,5 +1,9 @@
 # pastebin.fi API
 
+![7d uptime badge](https://status.protokolla.fi/api/v1/endpoints/03---pastebin-fi_pastebin-fi---backend/uptimes/7d/badge.svg)
+![7d response time badge](https://status.protokolla.fi/api/v1/endpoints/03---pastebin-fi_pastebin-fi---backend/response-times/7d/badge.svg)
+![health badge (up or down)](https://status.protokolla.fi/api/v1/endpoints/03---pastebin-fi_pastebin-fi---backend/health/badge.svg)
+
 This is the API for [pastebin.fi](https://pastebin.fi). The frontend can be found [here](https://github.com/pastebin-fi/frontend).
 
 Documentation for the API can be viewed at [api.pastebin.fi/docs](https://api.pastebin.fi/docs). The openapi spec is loaded from [openapi.json](./src/openapi.json).
