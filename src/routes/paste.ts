@@ -147,7 +147,9 @@ class Pastes extends Routes {
         }
 
         try {
-            await this.PasteModel.findOneAndUpdate({ id: requestedId }, { $inc: { "meta.views": 1 } })
+            if (!("scrape" in req.params)) {
+                await this.PasteModel.findOneAndUpdate({ id: requestedId }, { $inc: { "meta.views": 1 } })
+            }
         } catch (err) {
             return this.sendPasteNotFoundResponse(res)
         }
@@ -157,6 +159,23 @@ class Pastes extends Routes {
             await this.PasteModel.findOneAndUpdate(
                 { id: requestedId },
                 { $inc: { "meta.size": paste.meta.size } }
+            )
+        }
+
+        if (!paste.lang) {
+            const language_guesses = await modulOperations.runModel(paste.content);
+
+            // most likely returned when paste is under 20 chars
+            // or no programming language
+            let language = "plaintext";
+    
+            if (language_guesses.length > 0 && language_guesses[0].confidence > 0.1) {
+                language = language_guesses[0].languageId;
+            }
+
+            await this.PasteModel.findOneAndUpdate(
+                { id: requestedId },
+                { "lang": language }
             )
         }
 
