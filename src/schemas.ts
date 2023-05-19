@@ -14,13 +14,13 @@ const PasteSchema = new Schema({
     sha256: String,
     deletekey: String,
     content: String,
-    language: String,
+    lang: String, // language is reserved for real languages
     date: { type: Date, default: Date.now },
     hidden: Boolean,
     meta: {
         votes: Number,
         favs: Number,
-        views: Number,
+        views: { type: Number, default: 0},
         size: Number,
     },
     removed: { 

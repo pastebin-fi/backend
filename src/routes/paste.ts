@@ -84,9 +84,6 @@ class Pastes extends Routes {
             language = language_guesses[0].languageId;
         }
 
-        console.log(language_guesses)
-        console.log(language);
-
         if (await this.PasteModel.exists({ sha256: hash })) {
             const existingPasteID = (await this.PasteModel.findOne({ sha256: hash }).select("id -_id"))?.id
             return this.sendErrorResponse(
@@ -106,7 +103,7 @@ class Pastes extends Routes {
             title: title,
             id: makeid(7),
             hidden: req.body.private == true ? true : false,
-            language: language,
+            lang: language,
             sha256: hash,
             meta: {
                 votes: null,
@@ -169,7 +166,7 @@ class Pastes extends Routes {
 
         // Filter out unwanted data (ip address, removal and so on...)
         const allowedKeys = [
-            "language",
+            "lang",
             "hidden",
             "id",
             "content",

@@ -227,7 +227,7 @@
                       "message": "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
                     }
                   },
-                  "language": {
+                  "lang": {
                     "summary": "Programming language names over 30 characters are disallowed",
                     "value": {
                       "title": "Virheellinen ohjelmointikieli",
@@ -479,7 +479,7 @@
             "example": "Lorem ipsum dolor sit amet...",
             "description": "Paste content"
           },
-          "language": {
+          "lang": {
             "type": "string",
             "default": "text",
             "example": "python",
@@ -497,7 +497,7 @@
         "type": "object",
         "required": [
           "id",
-          "language"
+          "lang"
         ],
         "properties": {
           "id": {
@@ -505,7 +505,7 @@
             "example": "Placeholder text",
             "description": "Paste identifier can be used for a redirect to the paste when created"
           },
-          "language": {
+          "lang": {
             "type": "string",
             "example": "ts",
             "default": "plaintext",
@@ -540,7 +540,7 @@
           "id",
           "hidden",
           "date",
-          "language"
+          "lang"
         ],
         "type": "object",
         "properties": {
@@ -567,7 +567,7 @@
             "format": "date-time",
             "example": "2023-05-03T11:19:20.137Z"
           },
-          "language": {
+          "lang": {
             "type": "string",
             "example": "ts",
             "default": "plaintext",
