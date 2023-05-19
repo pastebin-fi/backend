@@ -147,7 +147,7 @@ class Pastes extends Routes {
         }
 
         try {
-            if (!("scrape" in req.params)) {
+            if (!("scrape" in req.query)) {
                 await this.PasteModel.findOneAndUpdate({ id: requestedId }, { $inc: { "meta.views": 1 } })
             }
         } catch (err) {
