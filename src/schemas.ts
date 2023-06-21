@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose"
 
-const { Schema } = mongoose;
+const { Schema } = mongoose
 
 const PasteSchema = new Schema({
     title: String,
@@ -20,36 +20,38 @@ const PasteSchema = new Schema({
     meta: {
         votes: Number,
         favs: Number,
-        views: { type: Number, default: 0},
+        views: { type: Number, default: 0 },
         size: Number,
     },
-    removed: { 
-        isRemoved: {type: Boolean, default: false},
-        reason: {type: String, default: ""}
+    removed: {
+        isRemoved: { type: Boolean, default: false },
+        reason: { type: String, default: "" },
     },
-});
+})
 
-PasteSchema.index({
-    title: 'text',
-    content: 'text',
-}, {
-    name: 'Search index',
-    weights: {
-        title: 10,
-        content: 6
+PasteSchema.index(
+    {
+        title: "text",
+        content: "text",
+    },
+    {
+        name: "Search index",
+        weights: {
+            title: 10,
+            content: 6,
+        },
     }
-});
+)
 
 const UserSchema = new Schema({
     name: String,
-    pwHash: String,
-    pwSalt: String,
+    password: String,
     email: String,
     activated: Boolean,
     activationKey: String,
     ip: {
         last: String,
-        all: [String]
+        all: [String],
     },
     registered: { type: Date, default: Date.now },
     roles: [String],
@@ -60,9 +62,9 @@ const UserSchema = new Schema({
     },
     followed: [String],
     favorites: [String],
-    banned: { 
-        status: {type: Boolean, default: false},
-        reason: {type: String, default: ""}
+    banned: {
+        status: { type: Boolean, default: false },
+        reason: { type: String, default: "" },
     },
 })
 

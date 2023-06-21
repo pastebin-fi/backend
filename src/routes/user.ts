@@ -1,105 +1,117 @@
-/*
-import config from "../config";
+import { sha256 } from "js-sha256"
+import { readFile } from "fs/promises"
+import { RequestHandler, Router } from "express"
+import { ModelOperations } from "@vscode/vscode-languagedetection"
+import { hash } from "bcrypt"
 
-const mongoose = require('mongoose');
-const sha256 = require('js-sha256').sha256;
-const findInFiles = require('find-in-files');
-const fs = require('fs/promises');
+import config from "../config"
+import { createAccountLimiter, loginAccountLimiter } from "../ratelimiters/users"
+import { makeid } from "../helpers"
+import { Routes } from "./router"
 
-const { makeid, checkReputation } = require('../helpers');
-const schemas = require('../schemas');
+const modulOperations = new ModelOperations()
 
-const Paste = mongoose.model('Paste', schemas.PasteSchema);
-exports.Paste = Paste;
+type RequestParams = Parameters<RequestHandler>
 
-const abuseipdbKey = process.env.ABUSEIPDB_KEY
-const dataDir = process.env.DATA_DIR
+function validateEmail(email: string) {
+    const re =
+        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    return re.test(email)
+}
 
-exports.new = async (req, res) => {
-    if (req.body.username === "") {
-        return res.status(413).send({
-            "error": "Käyttäjänimi tulee mainita"
-        })
-    } else if (req.body.email === "") {
-        return res.status(413).send({
-            "error": "Sähköposti tulee mainita"
-        })
-    } else if (req.body.password === "") {
-        return res.status(413).send({
-            "error": "Salasana tulee mainita"
-        })
+class Users extends Routes {
+    router: Router
+
+    constructor() {
+        super()
+
+        this.router = Router()
+        this.router.use(this.checkClientReputation.bind(this))
+        this.router.post("/create", createAccountLimiter, this.newUser.bind(this))
+        this.router.post("/login", loginAccountLimiter, this.newUser.bind(this)) // Create a new paste
     }
 
-    const ip = config.trust_proxy > 0 ? req.headers['x-forwarded-for'] : req.socket.remoteAddress.replace(/^.*:/, '');
-    const reputation = JSON.parse(await checkReputation(ip, abuseipdbKey))
+    sendPasteNotFoundResponse(res: RequestParams[1]) {
+        return this.sendErrorResponse(
+            res,
+            404,
+            "Käyttäjää ei löytynyt",
+            "Olemme pahoillamme, mutta hakemaasi liitettä ei löytynyt."
+        )
+    }
 
-    if ("errors" in reputation) {
-        reputation.errors.forEach(error => {
-            console.log('AbuseIPDB', error)
-        });
-    } else {
-        if (reputation.data.abuseConfidenceScore > 60) {
-            res.status(403).send({
-                "error": "IP-osoitteesi on mustalla listalla emmekä hyväksy uusia käyttäjiä sieltä."
-            });
-            return;
+    async newUser(req: RequestParams[0], res: RequestParams[1]) {
+        if (!config.allow_registrations)
+            return this.sendErrorResponse(
+                res,
+                403,
+                "Rekisteröinti epäonnistui",
+                "Rekisteröintejä ei oteta tällä hetkellä vastaan."
+            )
+
+        const body = await req.body
+        if (!body || !body.username || !body.password || !body.email)
+            return this.sendErrorResponse(res, 400, "Pyynnön vartalo on pakollinen", "Et voi luoda tyhjää pyyntöä.")
+
+        const username = body.username
+        const password = body.password
+
+        // Run checks
+        const usernameRegex = /^[a-z]{1}[a-z_0-9-]{0,18}[a-z]{1}$/
+        if (!usernameRegex.test(username)) {
+            return this.sendErrorResponse(
+                res,
+                400,
+                "Virheellinen käyttäjänimi",
+                "Käyttäjänimen tulee koostua 3-20 merkistä ja kirjaimista a-z, numeroista 0-9, erikoismerkeistä '_, -' ja alkaa kirjaimella a-z."
+            )
         }
-    }
 
-    const username = req.body.paste
-    const email = req.body.email
-    const password = req.body.password
+        if (password.length < 8)
+            return this.sendErrorResponse(res, 400, "Virheellinen salasana", "Salasanan tulee olla väh. 8 merkkiä.")
 
-    if (username.length < 3 || username.length > 20) {
-        res.status(413).send({
-            "error": "Käyttäjänimen tulee olla 3-20 merkkiä pitkä."
-        });
-        return;
-    }
+        const email = body.email
+        if (!validateEmail(email))
+            return this.sendErrorResponse(
+                res,
+                400,
+                "Virheellinen sähköpostiosoite",
+                "Sähköpostiosoite on virheellinen, joten käyttäjää ei luotu."
+            )
 
-    if (email.length < 3 || email.length > 320) {
-        res.status(413).send({
-            "error": "Sähköpostin tulee olla 3-320 merkkiä pitkä."
-        });
-        return;
-    }
+        if (await this.UserModel.exists({ name: username }))
+            return this.sendErrorResponse(
+                res,
+                409,
+                "Käyttäjä on jo olemassa",
+                "Luotu käyttäjä on jo olemassa, joten sitä ei luotu."
+            )
 
-    // Salasanan pituus on varmistettu oletuksena bcrypt-kirjastossa
+        const passwordHashed = await hash(password, 12)
+        const user = {
+            name: username,
+            password: passwordHashed,
+            email: email,
+            ip: { last: req.ip.toString(), all: [req.ip.toString()] },
+        }
 
-    const hash = sha256(content)
-    if (await Paste.exists({ sha256: hash })) {
-        console.log("Liite samalla sisällöllä on jo olemassa")
-        const id = (await Paste.findOne({ sha256: hash }).select('id -_id')).id
+        this.UserModel.create(user, (err, user) => {
+            if (err) {
+                this.logger.log(err)
+                this.sendErrorResponse(
+                    res,
+                    500,
+                    "Käyttäjää ei voitu luoda",
+                    "Jotain meni vikaan, eikä käyttäjää luotu."
+                )
+            }
+            this.logger.log(`${req.ip} - ${Date.now().toString()} - New user created: '${user.name}'`)
+        })
+
         res.send({
-            "id": id
-        });
-        return;
+            username: username,
+        })
     }
+}
 
-    const paste = {
-        title: title,
-        author: null,
-        id: makeid(7),
-        ip: ip,
-        hidden: req.body.hidden == "true" ? true : false,
-        sha256: hash,
-        deletekey: makeid(64),
-        meta: {
-            votes: null,
-            favs: null,
-            views: 0,
-            size: size,
-        },
-    };
-
-    await fs.writeFile(`${dataDir}/${hash}`, content);
-
-    Paste.create(paste, (err, paste) => {
-        if (err) throw err;
-        console.log(`${Date.now().toString()} - New paste created with id ${paste.id}`);
-        res.send({
-            "id": paste.id
-        });
-    });
-};
-*/
+export { Users }
