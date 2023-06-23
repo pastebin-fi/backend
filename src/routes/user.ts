@@ -28,8 +28,10 @@ class Users extends Routes {
         this.router = Router()
         this.router.use(this.checkClientReputation.bind(this))
         this.router.post("/create", createAccountLimiter, this.newUser.bind(this))
-        this.router.post("/login", loginAccountLimiter, this.login.bind(this)) // Create a new paste
-        this.router.get("/session", this.listSessions.bind(this)) // Create a new paste
+        this.router.post("/login", loginAccountLimiter, this.login.bind(this))
+        this.router.post("/update", this.updateAccount.bind(this))
+
+        this.router.get("/session", this.listSessions.bind(this))
         this.router.delete("/session", this.removeSession.bind(this))
     }
 
@@ -175,6 +177,45 @@ class Users extends Routes {
         res.status(sessionAmount > afterSessionAmount ? 200 : 400).send(
             sessionAmount > afterSessionAmount ? "Session deleted" : userErrors.sessionNotFound
         )
+    }
+
+    async updateAccount(req: RequestParams[0], res: RequestParams[1]) {
+        const body = await req.body
+        const updateable = body.updateable
+        const password = body.password
+        if (!updateable || !password) return this.sendErrorResponse(res, 400, userErrors.invalidBody)
+
+        const identity = await this.requireAuthentication(req)
+        if (!identity) return this.sendErrorResponse(res, 401, userErrors.invalidBody)
+
+        if (!(await compare(password, identity.user.password)))
+            return this.sendErrorResponse(res, 401, userErrors.loginFailed)
+
+        if (updateable["bio"]?.length <= 200) {
+            identity.user.meta.bio = updateable["bio"]
+        }
+        if (updateable["email"]) {
+            const email = updateable["email"]
+            if (!validateEmail(email)) return this.sendErrorResponse(res, 400, userErrors.invalidEmail)
+            identity.user.email = email
+        }
+        if (updateable["pic"]) {
+            const allowedPicUrls = ["avatars.githubusercontent.com"]
+            const url = new URL(updateable["pic"])
+            if (!url) return this.sendErrorResponse(res, 400, userErrors.invalidBody)
+            if (allowedPicUrls.includes(url.hostname)) {
+                identity.user.meta.pic = url
+            } else {
+                return this.sendErrorResponse(res, 400, userErrors.invalidPicUrl)
+            }
+        }
+
+        await identity.user.save()
+
+        res.status(200).send({
+            message: "Profile was saved",
+            updated: updateable,
+        })
     }
 }
 

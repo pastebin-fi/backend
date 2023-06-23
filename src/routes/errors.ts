@@ -12,6 +12,10 @@ const userErrors = {
         error: "Istuntoa ei löytynyt",
         message: "Poistettavaa istuntoa ei löytynyt.",
     },
+    invalidPicUrl: {
+        error: "Virheellinen osoite",
+        message: "Tätä osoitetta ei voida käyttää kuvien hakemiseen.",
+    },
     registrationFailed: {
         error: "Rekisteröinti epäonnistui",
         message: "Rekisteröintejä ei oteta tällä hetkellä vastaan.",
