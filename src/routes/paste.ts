@@ -1,14 +1,15 @@
 import { sha256 } from "js-sha256"
 import { readFile } from "fs/promises"
 import { RequestHandler, Router } from "express"
-import { ModelOperations } from "@vscode/vscode-languagedetection";
+import { ModelOperations } from "@vscode/vscode-languagedetection"
 
 import config from "../config"
 import { newPasteRateLimiter } from "../ratelimiters/pastes"
 import { makeid } from "../helpers"
 import { Routes } from "./router"
+import { pasteErrors } from "./errors"
 
-const modulOperations = new ModelOperations();
+const modulOperations = new ModelOperations()
 
 type RequestParams = Parameters<RequestHandler>
 
@@ -19,80 +20,42 @@ class Pastes extends Routes {
         super()
 
         this.router = Router()
-        this.router.post(
-            "/",
-            newPasteRateLimiter,
-            this.checkClientReputation.bind(this),
-            this.newPaste.bind(this)
-        ) // Create a new paste
+        this.router.post("/", newPasteRateLimiter, this.checkClientReputation.bind(this), this.newPaste.bind(this)) // Create a new paste
         this.router.get("/:id", this.getPaste.bind(this)) // Get a specific paste
         this.router.get("/", this.filterPastes.bind(this)) // Search pastes
     }
 
     sendPasteNotFoundResponse(res: RequestParams[1]) {
-        return this.sendErrorResponse(
-            res,
-            404,
-            "Liitettä ei löytynyt",
-            "Olemme pahoillamme, mutta hakemaasi liitettä ei löytynyt."
-        )
+        return this.sendErrorResponse(res, 404, pasteErrors.notFound)
     }
 
     async newPaste(req: RequestParams[0], res: RequestParams[1]) {
         const body = await req.body
-        if (!body || !body.paste)
-            return this.sendErrorResponse(
-                res,
-                400,
-                "Pyynnön vartalo on pakollinen",
-                "Et voi luoda tyhjää pyyntöä."
-            )
-
         const content = body.paste
         const title = body.title
+        if (!body || !content) return this.sendErrorResponse(res, 400, pasteErrors.invalidBody)
+
         const size = Buffer.byteLength(content, "utf8")
+        if (size > 10000000) return this.sendErrorResponse(res, 413, pasteErrors.tooBig)
 
-        // Run checks
-        if (!content) {
-            return this.sendErrorResponse(res, 400, "Sisältö on pakollinen", "Et voi luoda tyhjää liitettä.")
-        }
-
-        if (size > 10000000)
-            return this.sendErrorResponse(
-                res,
-                413,
-                "Liite on liian iso",
-                "Palveluun ei voi luoda yli kymmenen (10) MB liitteitä."
-            )
-
-        if (title.length > 300)
-            return this.sendErrorResponse(
-                res,
-                413,
-                "Virheellinen nimi",
-                "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
-            )
+        if (title.length > 300) return this.sendErrorResponse(res, 413, pasteErrors.invalidName)
 
         const hash = sha256(content)
-        const language_guesses = await modulOperations.runModel(content);
+        const language_guesses = await modulOperations.runModel(content)
 
         // most likely returned when paste is under 20 chars
         // or no programming language
-        let language = "plaintext";
+        let language = "plaintext"
 
         if (language_guesses.length > 0 && language_guesses[0].confidence > 0.1) {
-            language = language_guesses[0].languageId;
+            language = language_guesses[0].languageId
         }
 
         if (await this.PasteModel.exists({ sha256: hash })) {
             const existingPasteID = (await this.PasteModel.findOne({ sha256: hash }).select("id -_id"))?.id
-            return this.sendErrorResponse(
-                res,
-                409,
-                "Liite on jo olemassa",
-                "Luotu liite on jo olemassa, joten sitä ei luotu.",
-                { pasteIdentifier: existingPasteID }
-            )
+            return this.sendErrorResponse(res, 409, pasteErrors.pasteAlreadyExists, {
+                pasteIdentifier: existingPasteID,
+            })
         }
 
         const deletekey = makeid(64)
@@ -117,12 +80,7 @@ class Pastes extends Routes {
         this.PasteModel.create(paste, (err, paste) => {
             if (err) {
                 this.logger.log(err)
-                this.sendErrorResponse(
-                    res,
-                    500,
-                    "Liitettä ei voitu luoda",
-                    "Jotain meni vikaan, eikä liitettä luotu."
-                )
+                this.sendErrorResponse(res, 500, pasteErrors.pasteNotCreated)
             }
             this.logger.log(`${req.ip} - ${Date.now().toString()} - New paste created with id ${paste.id}`)
         })
@@ -130,7 +88,7 @@ class Pastes extends Routes {
         res.send({
             id: paste.id,
             delete: deletekey,
-            language
+            language,
         })
     }
 
@@ -156,27 +114,21 @@ class Pastes extends Routes {
 
         if (paste.meta && !paste.meta.size) {
             paste.meta.size = Buffer.byteLength(paste.content || "", "utf8")
-            await this.PasteModel.findOneAndUpdate(
-                { id: requestedId },
-                { $inc: { "meta.size": paste.meta.size } }
-            )
+            await this.PasteModel.findOneAndUpdate({ id: requestedId }, { $inc: { "meta.size": paste.meta.size } })
         }
 
         if (!paste.lang) {
-            const language_guesses = await modulOperations.runModel(paste.content);
+            const language_guesses = await modulOperations.runModel(paste.content)
 
             // most likely returned when paste is under 20 chars
             // or no programming language
-            let language = "plaintext";
-    
+            let language = "plaintext"
+
             if (language_guesses.length > 0 && language_guesses[0].confidence > 0.1) {
-                language = language_guesses[0].languageId;
+                language = language_guesses[0].languageId
             }
 
-            await this.PasteModel.findOneAndUpdate(
-                { id: requestedId },
-                { "lang": language }
-            )
+            await this.PasteModel.findOneAndUpdate({ id: requestedId }, { lang: language })
         }
 
         if (paste.removed?.isRemoved) {
@@ -184,17 +136,7 @@ class Pastes extends Routes {
         }
 
         // Filter out unwanted data (ip address, removal and so on...)
-        const allowedKeys = [
-            "lang",
-            "hidden",
-            "id",
-            "content",
-            "meta",
-            "allowedreads",
-            "date",
-            "author",
-            "title",
-        ]
+        const allowedKeys = ["lang", "hidden", "id", "content", "meta", "allowedreads", "date", "author", "title"]
 
         let visiblePaste = JSON.parse(JSON.stringify(paste)) // https://stackoverflow.com/questions/9952649/convert-mongoose-docs-to-json
         Object.keys(visiblePaste).forEach((key) => allowedKeys.includes(key) || delete visiblePaste[key])

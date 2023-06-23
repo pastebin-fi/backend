@@ -34,6 +34,7 @@ function initExpressRouter() {
 
     app.use(urlencoded({ extended: true, limit: "10mb" }))
     app.use(json({ limit: "10mb" }))
+    app.use(require("cookie-parser")())
 
     new Routes()
     app.use("/", new General().router)

@@ -53,7 +53,7 @@ const UserSchema = new Schema({
         last: String,
         all: [String],
     },
-    registered: { type: Date, default: Date.now },
+    registered: { type: Date, default: () => Date.now() },
     roles: [String],
     meta: {
         pic: String,
@@ -66,6 +66,20 @@ const UserSchema = new Schema({
         status: { type: Boolean, default: false },
         reason: { type: String, default: "" },
     },
+    sessions: [
+        {
+            token: String,
+            ip: String,
+            lastLogin: {
+                type: Date,
+                default: () => Date.now(),
+            },
+            initializedAt: {
+                type: Date,
+                default: () => Date.now(),
+            },
+        },
+    ],
 })
 
 export { PasteSchema, UserSchema }

@@ -4,6 +4,7 @@ import { PasteSchema, UserSchema } from "../schemas"
 import { Model, model } from "mongoose"
 import config from "../config"
 import { RequestHandler } from "express"
+import { CustomError, userErrors } from "./errors"
 
 type RequestParams = Parameters<RequestHandler>
 
@@ -30,10 +31,10 @@ class Routes {
         if (!this.PasteModel) this.criticalLogger.error(`Unable to initialize PasteModel`)
     }
 
-    sendErrorResponse(res: any, status: number, title: string, message: string, additionalfields?: {}) {
+    sendErrorResponse(res: any, status: number, err: CustomError, additionalfields?: {}) {
         return res.status(status).send({
-            title: title,
-            message: message,
+            title: err.error,
+            message: err.message,
             data: additionalfields,
         })
     }
@@ -47,14 +48,7 @@ class Routes {
                     this.logger?.error("AbuseIPDB", error)
                 })
             } else {
-                if (reputation.data.abuseConfidenceScore > 60) {
-                    return this.sendErrorResponse(
-                        res,
-                        403,
-                        "Pääsy hylätty",
-                        "IP-osoitteesi maine on huono, joten hylkäsimme pyyntösi uuden liitteen luomiseksi."
-                    )
-                }
+                if (reputation.data.abuseConfidenceScore > 60) return this.sendErrorResponse(res, 403, userErrors.badIP)
             }
         }
         next()
