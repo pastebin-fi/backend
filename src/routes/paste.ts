@@ -22,6 +22,7 @@ class Pastes extends Routes {
         this.router = Router()
         this.router.post("/", newPasteRateLimiter, this.checkClientReputation.bind(this), this.newPaste.bind(this)) // Create a new paste
         this.router.get("/:id", this.getPaste.bind(this)) // Get a specific paste
+        this.router.delete("/:id", this.deletePaste.bind(this)) // Get a specific paste
         this.router.get("/", this.filterPastes.bind(this)) // Search pastes
     }
 
@@ -157,6 +158,24 @@ class Pastes extends Routes {
         }
 
         res.send(visiblePaste)
+    }
+
+    async deletePaste(req: RequestParams[0], res: RequestParams[1]) {
+        const body = await req.body
+        const deletionKey = body.deletionKey
+
+        const identity = await this.requireAuthentication(req)
+        if (!identity && !deletionKey) return this.sendErrorResponse(res, 401, pasteErrors.invalidBody)
+
+        const doc = await this.PasteModel.findOne({ id: req.params.id })
+        if (!doc) return this.sendErrorResponse(res, 404, pasteErrors.notFound)
+
+        if (doc.author === identity?.user.name || doc.deletekey === deletionKey) {
+            await doc.delete()
+            return res.status(200).send()
+        }
+
+        res.status(403).send(userErrors.invalidBody)
     }
 
     async filterPastes(req: RequestParams[0], res: RequestParams[1]) {

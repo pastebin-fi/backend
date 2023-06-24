@@ -24,6 +24,7 @@ class Users extends Routes {
 
         this.router = Router()
         this.router.use(this.checkClientReputation.bind(this))
+        this.router.get("/me", this.info.bind(this))
         this.router.post("/create", createAccountLimiter, this.newUser.bind(this))
         this.router.post("/login", loginAccountLimiter, this.login.bind(this))
         this.router.post("/update", this.updateAccount.bind(this))
@@ -32,6 +33,19 @@ class Users extends Routes {
         this.router.get("/session", this.listSessions.bind(this))
         this.router.delete("/session", this.removeSession.bind(this))
         this.router.get("/logout", this.logout.bind(this))
+    }
+
+    async info(req: RequestParams[0], res: RequestParams[1]) {
+        const identity = await this.requireAuthentication(req)
+        if (!identity) return this.sendErrorResponse(res, 401, userErrors.authenticationRequired)
+
+        res.send({
+            username: identity.user.name,
+            email: identity.user.email,
+            activated: identity.user.activated,
+            banned: identity.user.banned,
+            meta: identity.user.meta,
+        })
     }
 
     async newUser(req: RequestParams[0], res: RequestParams[1]) {
