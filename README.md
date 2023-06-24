@@ -65,9 +65,4 @@ Since the project uses typescript you cannot just start the project with `node .
 
 ## Configuration variables
 
-| Key | Description |
-| --- | ----------- |
-| mongo_uri | Example: `mongodb+srv://user:pass@host/database`. This is the URI that MongoDB tries to connect to. It should be in format `mongodb+src://<user>:<password>@<hostname>/<database>` |
-| site_url | Example: `http://localhost:3000`. The app parser required info from it. |
-| trust_proxy | Number of proxies to trust (handy when using reverse proxy). |
-| secret | Should be something random and unique. |
+see `.env.example`
