@@ -7,7 +7,7 @@ import config from "../config"
 import { newPasteRateLimiter } from "../ratelimiters/pastes"
 import { makeid } from "../helpers"
 import { Routes } from "./router"
-import { pasteErrors } from "./errors"
+import { pasteErrors, userErrors } from "./errors"
 
 const modulOperations = new ModelOperations()
 
@@ -169,6 +169,7 @@ class Pastes extends Routes {
         let offset = varOrDefault(req.query.offset, 0)
         let limit = varOrDefault(req.query.limit, 10)
         let sorting = varOrDefault(req.query.sorting, "-date")
+        let author = varOrDefault(req.query.author, undefined)
 
         // Do not allow too many pastes
         limit = limit > 30 ? 30 : limit
@@ -180,7 +181,17 @@ class Pastes extends Routes {
         let search: {
             hidden: boolean
             $text?: { $search: any }
+            author?: string
         } = { hidden: false }
+
+        if (author) {
+            if (author !== "@me") search.author = author
+            else {
+                const identity = await this.requireAuthentication(req)
+                if (!identity) search.author = "Tuntematon lataaja"
+                else search.author = identity.user.name
+            }
+        }
         if (query) {
             score = { score: { $meta: "textScore" } }
             search.$text = { $search: query }

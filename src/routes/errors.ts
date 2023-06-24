@@ -4,6 +4,10 @@ interface CustomError {
 }
 
 const userErrors = {
+    authenticationRequired: {
+        error: "Pääsy evätty",
+        message: "Sinun tulee kirjautua sisään käyttääksesi tätä ominaisuutta",
+    },
     userNotFound: {
         error: "Käyttäjää ei löytynyt",
         message: "Olemme pahoillamme, mutta hakemaasi käyttäjää ei löytynyt.",
