@@ -33,7 +33,7 @@ class Pastes extends Routes {
         const body = await req.body
         const content = body.paste
         const title = body.title
-        if (!body || !content) return this.sendErrorResponse(res, 400, pasteErrors.invalidBody)
+        if (!body || !content || !title) return this.sendErrorResponse(res, 400, pasteErrors.invalidBody)
 
         const size = Buffer.byteLength(content, "utf8")
         if (size > 10000000) return this.sendErrorResponse(res, 413, pasteErrors.tooBig)
