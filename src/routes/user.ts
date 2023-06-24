@@ -1,5 +1,4 @@
 import { RequestHandler, Router } from "express"
-import { ModelOperations } from "@vscode/vscode-languagedetection"
 import { hash, compare } from "bcrypt"
 
 import config from "../config"
@@ -7,13 +6,14 @@ import { createAccountLimiter, loginAccountLimiter } from "../ratelimiters/users
 import { Routes } from "./router"
 import { randomUUID } from "crypto"
 import { errors, userErrors } from "./errors"
+import { makeid } from "../helpers"
 
 type RequestParams = Parameters<RequestHandler>
 
-function validateEmail(email: string) {
+function validateEmail(email: string | undefined) {
     const re =
         /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    return re.test(email)
+    return re.test(email || "")
 }
 
 class Users extends Routes {
@@ -28,6 +28,8 @@ class Users extends Routes {
         this.router.post("/create", createAccountLimiter, this.newUser.bind(this))
         this.router.post("/login", loginAccountLimiter, this.login.bind(this))
         this.router.post("/update", this.updateAccount.bind(this))
+        this.router.post("/resend-mail", this.resendEmail.bind(this))
+        this.router.post("/activate", this.activateUser.bind(this))
         this.router.delete("/", this.deleteAccount.bind(this))
 
         this.router.get("/session", this.listSessions.bind(this))
@@ -48,8 +50,77 @@ class Users extends Routes {
         })
     }
 
+    async sendVerificationEmail(mail: string, activationKey: string) {
+        try {
+            this.UserModel.updateOne({ email: mail }, { lastSentActivation: Date.now() })
+
+            const mailer = await this.mailer
+            await mailer.sendMail({
+                from: `"Email verification" <${process.env.MAIL_USER}>`,
+                to: mail,
+                subject: "Complete your signup to pastebin.fi",
+                text: `Hi! Thank you for signing up to https://pastebin.fi. Use the following key to complete your signup: ${activationKey}`,
+            })
+            this.logger.log("Email sent to:", mail)
+            return true
+        } catch (e) {
+            this.logger.warn("Email failed to send:", e)
+            return false
+        }
+    }
+
+    async resendEmail(req: RequestParams[0], res: RequestParams[1]) {
+        const body = await req.body
+        const name = body.username
+
+        const user = await this.UserModel.findOne({ name }).exec()
+        if (!user) return this.sendErrorResponse(res, 404, userErrors.userNotFound)
+        const email = user.email
+
+        const id = makeid(32)
+        if (!(await this.sendVerificationEmail(email, id)))
+            return res.status(500).send({
+                message: "Verification email failed to send",
+            })
+        return res.status(200).send({
+            message: "Verification email was sent.",
+        })
+    }
+
+    timeOver(seconds: number, timestamp: Date) {
+        const ms = Date.now() - timestamp.getTime()
+        return ms / 1000 > seconds
+    }
+
+    async activateUser(req: RequestParams[0], res: RequestParams[1]) {
+        const identity = await this.requireAuthentication(req)
+        if (identity) return this.sendErrorResponse(res, 403, userErrors.userAlreadyLoggedIn)
+
+        const body = await req.body
+        const activationkey = body.activationkey
+        const name = body.username
+
+        const user = await this.UserModel.findOne({ name }).exec()
+        if (!user) return this.sendErrorResponse(res, 404, userErrors.userNotFound)
+
+        const indexOf = user?.activations.findIndex((key) => key.id === activationkey)
+        if (indexOf === undefined || indexOf == -1) return this.sendErrorResponse(res, 403, userErrors.invalidKey)
+
+        if (this.timeOver(3600, user.activations[indexOf].createdAt))
+            return this.sendErrorResponse(res, 403, userErrors.invalidKey)
+
+        user.activated = true
+        user.activations = user.activations.filter((k) => k.id !== activationkey)
+        await user.save()
+
+        res.status(200).send()
+    }
+
     async newUser(req: RequestParams[0], res: RequestParams[1]) {
         if (!config.allow_registrations) return this.sendErrorResponse(res, 403, userErrors.registrationFailed)
+
+        const identity = await this.requireAuthentication(req)
+        if (identity) return this.sendErrorResponse(res, 403, userErrors.userAlreadyLoggedIn)
 
         const registeredAt = parseInt(req.cookies?.["registered_at"])
         if (registeredAt !== 0 && registeredAt - 3600 * 24)
@@ -77,8 +148,14 @@ class Users extends Routes {
         const user = {
             name: username,
             password: passwordHashed,
+            activations: [{ id: makeid(32) }],
+            activated: !config.mailerEnabled,
             email: email,
             ip: { last: req.ip.toString(), all: [req.ip.toString()] },
+        }
+
+        if (config.mailerEnabled) {
+            await this.sendVerificationEmail(email, user.activations[0].id)
         }
 
         try {
@@ -113,7 +190,9 @@ class Users extends Routes {
 
         const user = await this.UserModel.findOne({ name: body.username }).exec()
         if (!user) return this.sendErrorResponse(res, 400, userErrors.userNotFound)
-        if (!compare(user.password, body.password)) return this.sendErrorResponse(res, 401, userErrors.loginFailed)
+
+        if (!user.activated) return this.sendErrorResponse(res, 403, userErrors.notActivated)
+        if (!compare(user.password, body.password)) return this.sendErrorResponse(res, 403, userErrors.loginFailed)
 
         const update = await this.UserModel.updateOne({ name: body.username }, { $push: { sessions: session } })
         if (!update.acknowledged) {

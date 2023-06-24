@@ -48,7 +48,6 @@ const UserSchema = new Schema({
     password: String,
     email: String,
     activated: Boolean,
-    activationKey: String,
     ip: {
         last: String,
         all: [String],
@@ -59,6 +58,19 @@ const UserSchema = new Schema({
         pic: String,
         bio: String,
         followCount: Number,
+    },
+    activations: [
+        {
+            id: String,
+            createdAt: {
+                type: Date,
+                default: () => Date.now(),
+            },
+        },
+    ],
+    lastSentActivation: {
+        type: Date,
+        default: () => Date.now(),
     },
     followed: [String],
     favorites: [String],

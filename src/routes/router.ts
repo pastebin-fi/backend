@@ -5,6 +5,8 @@ import { Model, model } from "mongoose"
 import config from "../config"
 import { RequestHandler } from "express"
 import { CustomError, userErrors } from "./errors"
+import { Transporter } from "nodemailer"
+import SMTPTransport from "nodemailer/lib/smtp-transport"
 
 type RequestParams = Parameters<RequestHandler>
 
@@ -17,12 +19,14 @@ class Routes {
         name: string
         avatar: string
     }
+    mailer: Promise<Transporter<SMTPTransport.SentMessageInfo>>
 
     constructor() {
         this.criticalLogger = new Logger(true, true)
         this.logger = new Logger(true, false)
         this.PasteModel = model("Paste", PasteSchema)
         this.UserModel = model("User", UserSchema)
+        this.mailer = config.getMailer()
         this.unknown_author = config.unknown_author || {
             name: "Tuntematon",
             avatar: "https://images.unsplash.com/photo-1534294668821-28a3054f4256?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80",

@@ -24,7 +24,7 @@ let sessionEnvironment = {
     saveUninitialized: true,
 }
 
-function initExpressRouter() {
+async function initExpressRouter() {
     const app = express()
 
     //TODO: don't use hardcoded values
@@ -80,7 +80,8 @@ async function setupServer() {
         logger.error(err)
     }
 
-    initExpressRouter().listen(serverListenerProperties.port, async () =>
+    const router = await initExpressRouter()
+    router.listen(serverListenerProperties.port, async () =>
         logger.log(`Server listening at ${serverListenerProperties.display()}`)
     )
 }

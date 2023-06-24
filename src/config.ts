@@ -1,3 +1,17 @@
+import nodemailer from "nodemailer"
+const fs = require("fs").promises
+
+// https://www.digitalocean.com/community/tutorials/how-to-work-with-files-using-the-fs-module-in-node-js
+async function readFile(filePath: string) {
+    try {
+        const data = await fs.readFile(filePath)
+        return data.toString()
+    } catch (error) {
+        console.error(`Got an error trying to read the file: ${error.message}`)
+        return undefined
+    }
+}
+
 export default {
     mongo_uri: process.env.MONGO_URI || "mongodb://<username>:<password>@<host>/<...>",
     site_url: process.env.SITE_URL || "http://127.0.0.1",
@@ -5,6 +19,27 @@ export default {
     secret: process.env.SECRET || "keyboard cat",
     abuseipdb_key: process.env.ABUSEIPDB_KEY || "",
     data_dir: process.env.DATA_DIR || "./data",
+    getMailer: async () => {
+        const dkim =
+            process.env.DKIM_ENABLED === "true"
+                ? {
+                      domainName: process.env.DKIM_HOST,
+                      keySelector: process.env.DKIM_KEYSELECTOR,
+                      privateKey: await readFile(process.env.DKIM_PRIVATEKEY_FILE),
+                  }
+                : undefined
+        return nodemailer.createTransport({
+            host: process.env.MAIL_HOST,
+            port: parseInt(process.env.MAIL_PORT),
+            secure: process.env.MAIL_SECURE === "true",
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASSWORD,
+            },
+            dkim,
+        })
+    },
+    mailerEnabled: process.env.MAIL_ENABLED === "true",
 
     allow_registrations: process.env.ALLOW_REGISTER != "false",
     unknown_author: {

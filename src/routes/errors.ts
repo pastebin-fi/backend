@@ -4,6 +4,14 @@ interface CustomError {
 }
 
 const userErrors = {
+    emailRateLimit: {
+        error: "Liian yleinen pyyntö",
+        message: "Sinun tulee odottaa vähintään 30 sekuntia ennen seuraavan sähköpostin varmistuskoodin lähetystä.",
+    },
+    notActivated: {
+        error: "Käyttäjää ei ole aktivoitu",
+        message: "Käyttäjän tulee olla aktivoitu ennen kirjautumista.",
+    },
     authenticationRequired: {
         error: "Pääsy evätty",
         message: "Sinun tulee kirjautua sisään käyttääksesi tätä ominaisuutta",
@@ -54,7 +62,7 @@ const userErrors = {
         message: "Jotain meni vikaan, eikä käyttäjää luotu.",
     },
     userAlreadyLoggedIn: {
-        error: "Kirjautuminen epäonnistui",
+        error: "Rekisteröinti epäonnistui",
         message: "Olet jo kirjautunut sisään",
     },
     loginFailed: {
@@ -64,6 +72,10 @@ const userErrors = {
     badIP: {
         error: "Pääsy evätty",
         message: "IP-osoitteesi maine on huono, joten hylkäsimme pyyntösi uuden liitteen luomiseksi.",
+    },
+    invalidKey: {
+        error: "Virheellinen aktivointiavain",
+        message: "Käyttäjän aktivointiavain on virheellinen",
     },
 }
 
