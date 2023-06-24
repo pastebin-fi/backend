@@ -58,10 +58,13 @@ class Pastes extends Routes {
             })
         }
 
+        const authorIdentity = await this.requireAuthentication(req)
+
         const deletekey = makeid(64)
         const paste = {
             ip: req.ip,
             content,
+            author: authorIdentity?.user.name || undefined,
             deletekey,
             title: title,
             id: makeid(7),
@@ -77,13 +80,13 @@ class Pastes extends Routes {
         }
 
         // await fs.writeFile(`${dataDir}/${hash}`, content);
-        this.PasteModel.create(paste, (err, paste) => {
-            if (err) {
-                this.logger.log(err)
-                this.sendErrorResponse(res, 500, pasteErrors.pasteNotCreated)
-            }
+        try {
+            await this.PasteModel.create(paste)
             this.logger.log(`${req.ip} - ${Date.now().toString()} - New paste created with id ${paste.id}`)
-        })
+        } catch (err) {
+            this.logger.log(err)
+            return this.sendErrorResponse(res, 500, pasteErrors.pasteNotCreated)
+        }
 
         res.send({
             id: paste.id,

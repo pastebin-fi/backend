@@ -53,6 +53,35 @@ class Routes {
         }
         next()
     }
+
+    async requireAuthentication(req: RequestParams[0]) {
+        let sessionMetadata = {
+            user: "",
+            token: "",
+        }
+
+        try {
+            const session: string = req.cookies?.["session-token"]
+            sessionMetadata.user = Buffer.from(session.split(":")[0], "base64").toString()
+            sessionMetadata.token = session.split(":")[1]
+        } catch (e) {
+            return undefined
+        }
+
+        const user = await this.UserModel.findOne({ user: sessionMetadata.user }).exec()
+        if (!user) return undefined
+
+        const sessionIndex = user.sessions.findIndex((s) => s.token == sessionMetadata.token)
+        if (sessionIndex == -1) return undefined
+
+        user.sessions[sessionIndex].lastLogin = Date.now()
+        await user.save()
+
+        return {
+            session: sessionMetadata,
+            user,
+        }
+    }
 }
 
 export { Routes }

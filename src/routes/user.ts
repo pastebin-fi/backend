@@ -7,9 +7,6 @@ import { createAccountLimiter, loginAccountLimiter } from "../ratelimiters/users
 import { Routes } from "./router"
 import { randomUUID } from "crypto"
 import { errors, userErrors } from "./errors"
-import { setDefaultResultOrder } from "dns"
-
-const modulOperations = new ModelOperations()
 
 type RequestParams = Parameters<RequestHandler>
 
@@ -30,38 +27,11 @@ class Users extends Routes {
         this.router.post("/create", createAccountLimiter, this.newUser.bind(this))
         this.router.post("/login", loginAccountLimiter, this.login.bind(this))
         this.router.post("/update", this.updateAccount.bind(this))
+        this.router.delete("/", this.deleteAccount.bind(this))
 
         this.router.get("/session", this.listSessions.bind(this))
         this.router.delete("/session", this.removeSession.bind(this))
-    }
-
-    async requireAuthentication(req: RequestParams[0]) {
-        let sessionMetadata = {
-            user: "",
-            token: "",
-        }
-
-        try {
-            const session: string = req.cookies?.["session-token"]
-            sessionMetadata.user = Buffer.from(session.split(":")[0], "base64").toString()
-            sessionMetadata.token = session.split(":")[1]
-        } catch (e) {
-            return undefined
-        }
-
-        const user = await this.UserModel.findOne({ user: sessionMetadata.user }).exec()
-        if (!user) return undefined
-
-        const sessionIndex = user.sessions.findIndex((s) => s.token == sessionMetadata.token)
-        if (sessionIndex == -1) return undefined
-
-        user.sessions[sessionIndex].lastLogin = Date.now()
-        await user.save()
-
-        return {
-            session: sessionMetadata,
-            user,
-        }
+        this.router.get("/logout", this.logout.bind(this))
     }
 
     async newUser(req: RequestParams[0], res: RequestParams[1]) {
@@ -174,9 +144,20 @@ class Users extends Routes {
         await identity.user.save()
         const afterSessionAmount = identity.user.sessions.length
 
-        res.status(sessionAmount > afterSessionAmount ? 200 : 400).send(
-            sessionAmount > afterSessionAmount ? "Session deleted" : userErrors.sessionNotFound
-        )
+        const wasDeleted = sessionAmount > afterSessionAmount
+
+        res.send({ message: wasDeleted ? "Session deleted" : "Session didn't exist" })
+    }
+
+    async logout(req: RequestParams[0], res: RequestParams[1]) {
+        const identity = await this.requireAuthentication(req)
+        if (!identity) return this.sendErrorResponse(res, 401, userErrors.invalidBody)
+
+        const sessionIdToRemove = identity.session.token
+        identity.user.sessions = identity.user.sessions.filter((v) => v.token !== sessionIdToRemove)
+        await identity.user.save()
+
+        res.send({ message: "Session deleted" })
     }
 
     async updateAccount(req: RequestParams[0], res: RequestParams[1]) {
@@ -215,6 +196,29 @@ class Users extends Routes {
         res.status(200).send({
             message: "Profile was saved",
             updated: updateable,
+        })
+    }
+
+    async deleteAccount(req: RequestParams[0], res: RequestParams[1]) {
+        const body = await req.body
+        const password = body.password
+        if (!password) return this.sendErrorResponse(res, 400, userErrors.invalidBody)
+
+        const identity = await this.requireAuthentication(req)
+        if (!identity) return this.sendErrorResponse(res, 401, userErrors.invalidBody)
+
+        if (!(await compare(password, identity.user.password)))
+            return this.sendErrorResponse(res, 401, userErrors.loginFailed)
+
+        try {
+            await identity.user.deleteOne()
+        } catch (e) {
+            return this.sendErrorResponse(res, 400, errors.internal)
+        }
+
+        res.status(200).send({
+            message: "Your account was deleted",
+            one_more_message: "Sorry to see you go!",
         })
     }
 }
