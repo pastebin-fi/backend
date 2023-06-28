@@ -12,7 +12,7 @@ const limits: {
 } = {
     anonymous: {
         searchEnabled: false,
-        pasteSizeLimit: 1,
+        pasteSizeLimit: mb * 1,
         searchQueries: 0,
     },
     registered: {
