@@ -40,7 +40,7 @@ class Pastes extends Routes {
         const authorIdentity = await this.requireAuthentication(req)
 
         const size = Buffer.byteLength(content, "utf8")
-        const maxSize = getMaxSize(authorIdentity.user)
+        const maxSize = getMaxSize(authorIdentity?.user)
         if (size > maxSize) return this.sendErrorResponse(res, 413, pasteErrors.tooBig)
 
         if (title.length > 300) return this.sendErrorResponse(res, 413, pasteErrors.invalidName)
