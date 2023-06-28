@@ -72,7 +72,7 @@ class Routes {
             return undefined
         }
 
-        const user = await this.UserModel.findOne({ user: sessionMetadata.user }).exec()
+        const user = await this.UserModel.findOne({ name: sessionMetadata.user }).exec()
         if (!user) return undefined
 
         const sessionIndex = user.sessions.findIndex((s) => s.token == sessionMetadata.token)
