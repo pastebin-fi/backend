@@ -19,6 +19,7 @@ export default {
     secret: process.env.SECRET || "keyboard cat",
     abuseipdb_key: process.env.ABUSEIPDB_KEY || "",
     data_dir: process.env.DATA_DIR || "./data",
+    skipRatelimiters: process.env.SKIPRATELIMITERS == "true",
     getMailer: async () => {
         const dkim =
             process.env.DKIM_ENABLED === "true"

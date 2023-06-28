@@ -123,7 +123,7 @@ class Users extends Routes {
         if (identity) return this.sendErrorResponse(res, 403, userErrors.userAlreadyLoggedIn)
 
         const registeredAt = parseInt(req.cookies?.["registered_at"])
-        if (registeredAt !== 0 && registeredAt - 3600 * 24)
+        if (!config.skipRatelimiters && registeredAt !== 0 && registeredAt - 3600 * 24)
             return this.sendErrorResponse(res, 401, userErrors.registrationFailedRatelimit)
 
         const body = await req.body
