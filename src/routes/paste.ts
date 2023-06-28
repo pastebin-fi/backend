@@ -8,6 +8,7 @@ import { newPasteRateLimiter } from "../ratelimiters/pastes"
 import { makeid } from "../helpers"
 import { Routes } from "./router"
 import { pasteErrors, userErrors } from "./errors"
+import { getMaxSize } from "../utils/limits"
 
 const modulOperations = new ModelOperations()
 
@@ -36,8 +37,11 @@ class Pastes extends Routes {
         const title = body.title
         if (!body || !content || !title) return this.sendErrorResponse(res, 400, pasteErrors.invalidBody)
 
+        const authorIdentity = await this.requireAuthentication(req)
+
         const size = Buffer.byteLength(content, "utf8")
-        if (size > 10000000) return this.sendErrorResponse(res, 413, pasteErrors.tooBig)
+        const maxSize = getMaxSize(authorIdentity.user)
+        if (size > maxSize) return this.sendErrorResponse(res, 413, pasteErrors.tooBig)
 
         if (title.length > 300) return this.sendErrorResponse(res, 413, pasteErrors.invalidName)
 
@@ -58,8 +62,6 @@ class Pastes extends Routes {
                 pasteIdentifier: existingPasteID,
             })
         }
-
-        const authorIdentity = await this.requireAuthentication(req)
 
         const deletekey = makeid(64)
         const paste = {

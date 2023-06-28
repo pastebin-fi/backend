@@ -21,3 +21,9 @@ const limits: {
         pasteSizeLimit: mb * 5,
     },
 }
+
+const getPasteSizeLimit = (identity: any) => {
+    if (!identity) return limits.anonymous.pasteSizeLimit
+    return limits.registered.pasteSizeLimit
+}
+export { limits, getPasteSizeLimit as getMaxSize }
