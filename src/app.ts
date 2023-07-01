@@ -14,7 +14,7 @@ import cors from "cors"
 
 require("dotenv").config()
 
-const swaggerDocument: object = JSON.parse(readFileSync("openapi.json", "utf8"))
+const swaggerDocument: object = JSON.parse(readFileSync(config.openapiFile, "utf8"))
 
 const logger = new Logger(true, true)
 

@@ -45,6 +45,7 @@ export default {
     skipRatelimiters: process.env.SKIPRATELIMITERS == "true",
     corsEnabled: process.env.ENABLE_CORS == "true",
     corsAllowed: (process.env.ALLOWED_CORS_ORIGINS || "").split(","),
+    openapiFile: process.env.PASTEBIN_OPENAPI_SPEC_FILE || "openapi.json",
 
     mailerEnabled: process.env.MAIL_ENABLED === "true",
     getMailer: getMailer,
