@@ -44,7 +44,7 @@ export default {
     data_dir: process.env.DATA_DIR || "./data",
     skipRatelimiters: process.env.SKIPRATELIMITERS == "true",
     corsEnabled: process.env.ENABLE_CORS == "true",
-    corsAllowed: process.env.ALLOWED_CORS_ORIGINS.split(","),
+    corsAllowed: (process.env.ALLOWED_CORS_ORIGINS || "").split(","),
 
     mailerEnabled: process.env.MAIL_ENABLED === "true",
     getMailer: getMailer,
