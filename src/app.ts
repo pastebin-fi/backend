@@ -10,8 +10,11 @@ import { General } from "./routes/general"
 import { Metrics } from "./routes/metrics"
 import { Routes } from "./routes/router"
 import { Users } from "./routes/user"
+import cors from "cors"
 
-const swaggerDocument: object = JSON.parse(readFileSync("./openapi.json", "utf8"))
+require("dotenv").config()
+
+const swaggerDocument: object = JSON.parse(readFileSync("src/openapi.json", "utf8"))
 
 const logger = new Logger(true, true)
 
@@ -35,6 +38,15 @@ async function initExpressRouter() {
     app.use(urlencoded({ extended: true, limit: "10mb" }))
     app.use(json({ limit: "10mb" }))
     app.use(require("cookie-parser")())
+
+    if (config.corsEnabled)
+        app.use(
+            cors({
+                credentials: true,
+                origin: config.corsAllowed,
+                allowedHeaders: ["Content-Type"],
+            })
+        )
 
     new Routes()
     app.use("/", new General().router)
