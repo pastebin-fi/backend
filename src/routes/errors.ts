@@ -1,6 +1,7 @@
 interface CustomError {
     error: string
     message: string
+    errcode?: string
 }
 
 const userErrors = {
@@ -11,6 +12,7 @@ const userErrors = {
     notActivated: {
         error: "Käyttäjää ei ole aktivoitu",
         message: "Käyttäjän tulee olla aktivoitu ennen kirjautumista.",
+        errcode: "not_activated",
     },
     authenticationRequired: {
         error: "Pääsy evätty",

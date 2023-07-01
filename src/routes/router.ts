@@ -39,6 +39,7 @@ class Routes {
         return res.status(status).send({
             title: err.error,
             message: err.message,
+            errcode: err.errcode,
             data: additionalfields,
         })
     }
