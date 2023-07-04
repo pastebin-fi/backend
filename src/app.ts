@@ -11,12 +11,17 @@ import { Metrics } from "./routes/metrics"
 import { Routes } from "./routes/router"
 import { Users } from "./routes/user"
 import cors from "cors"
+import { generateOpenAPI } from './generateOpenAPI';
 
 require("dotenv").config()
 
-const swaggerDocument: object = JSON.parse(readFileSync(config.openapiFile, "utf8"))
-
 const logger = new Logger(true, true)
+
+generateOpenAPI().catch((error) => {
+    logger.error(error);
+});
+
+const swaggerDocument: object = JSON.parse(readFileSync(config.openapiFile, "utf8"))
 
 let sessionEnvironment = {
     secret: config.secret || "",
