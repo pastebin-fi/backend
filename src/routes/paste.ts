@@ -34,8 +34,8 @@ class Pastes extends Routes {
     async newPaste(req: RequestParams[0], res: RequestParams[1]) {
         const body = await req.body
         const content = body.paste
-        const title = body.title
-        if (!body || !content || !title) return this.sendErrorResponse(res, 400, pasteErrors.invalidBody)
+        const title = body.title // We allow empty titles so this doesn't have to be checked
+        if (!body || !content) return this.sendErrorResponse(res, 400, pasteErrors.invalidBody)
 
         const authorIdentity = await this.requireAuthentication(req)
 
