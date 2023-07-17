@@ -44,6 +44,20 @@ Creating & viewing a paste looks like this (currently the whole LangAPI implemen
   frontend <-- API [label = "return content w/ highlight.js highlight"];
 }```](https://kroki.io/seqdiag/svg/eNqNkV9LwzAUxd_9FIc-iANr3-cfUJRRcDqob-JD1lzTSpbO5NYhY9_dpHSbpcX6kIeQ37n3nBNHn7IUCtsT4N1WhslIIL7B7SLFqxZL0rhGtHjOXpCshWNy0dulh8N74B6FUUMsziQx5QztgVoomhx1V3E8oNs26BTrby4qg92R92vmlVHV_d0v3IkvQuMIp42yO78vsMS1NXB1npNrUxwiB0nXzp94r6DZw6GfZFrKEe-KuLW-SbAiFlKw-Kd_KzbIGxvc2dIvdJ5mWfo0w_5DWtUkOvcDdGU9Y0mO_Mp-SNhuUPBKD8jHa2x3h7xFqQrtD198uOMlZNn9AJvHxes=) -->
 
+### cors
+
+// TODO: create a table of env variables
+
+To enable cors you have to set two env variables:
+- ENABLE_CORS=true or false (make sure that everything is lower case)
+- ALLOWED_CORS_ORIGINS=https://siteyouwanttoallowapiaccess.com (this takes urls separated by commas (no whitespaces allowed), you cannot use * since it does not work with allow credentials). For more information, see: https://www.npmjs.com/package/cors#configuration-options (origin).
+
+Example
+```yaml
+ENABLE_CORS=true
+ALLOWED_CORS_ORIGINS=https://pastebin.fi,http://localhost:3000
+```
+
 ## Setup
 
 First of all, you should setup the environment variables (see [here](#Configuration-variables)). I would recommend to copy the `.env.example` file to `.env` (command is `cp .env.example .env`).
