@@ -41,12 +41,10 @@ async function initExpressRouter() {
     
     if (config.corsEnabled) {
         logger.log(`CORS enabled with origin(s): ${config.corsAllowed.join(', ')}`)
-        logger.log(`CORS enabled for all origins (PLEASE CREATE A PR TO FIX THIS)`)
         app.use(
             cors({
                 credentials: true,
-                // this is fucking stupid but I do not want to debug this cors shit anymore so this works... for now...
-                origin: '*', // config.corsAllowed,
+                origin: config.corsAllowed,
                 allowedHeaders: ["Content-Type"],
             })
         )
