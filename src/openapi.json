@@ -1,642 +1,608 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Pastebin.fi API",
-    "description": "Some endpoints might return more fields than are specified in this document. They are not supposed to be used by public until they are added to this document (since they are mostly for testing and can be removed at any point of time).\n\nUseful resources:\n- [Pastebin.fi API backend code](https://github.com/pastebin-fi/backend)\n- [Official frontend for pastebin.fi API](https://github.com/pastebin-fi/frontend)",
-    "termsOfService": "https://pastebin.fi/about",
-    "contact": {
-      "email": "sysadmin@pastebin.fi"
+  "openapi" : "3.0.0",
+  "info" : {
+    "contact" : {
+      "email" : "sysadmin@pastebin.fi"
     },
-    "license": {
-      "name": "AGPL-3.0",
-      "url": "https://www.gnu.org/licenses/agpl-3.0.en.html"
+    "description" : "Some endpoints might return more fields than are specified in this document. They are not supposed to be used by public until they are added to this document (since they are mostly for testing and can be removed at any point of time).\n\nUseful resources:\n- [Pastebin.fi API backend code](https://github.com/pastebin-fi/backend)\n- [Official frontend for pastebin.fi API](https://github.com/pastebin-fi/frontend)",
+    "license" : {
+      "name" : "AGPL-3.0",
+      "url" : "https://www.gnu.org/licenses/agpl-3.0.en.html"
     },
-    "version": "1.0.0"
+    "termsOfService" : "https://pastebin.fi/about",
+    "title" : "Pastebin.fi API",
+    "version" : "1.0.0"
   },
-  "servers": [
-    {
-      "url": "https://api.pastebin.fi",
-      "description": "Production server (uses live data)"
-    }
-  ],
-  "tags": [
-    {
-      "name": "paste",
-      "description": "Requests related to pastes"
-    },
-    {
-      "name": "metrics",
-      "description": "Requestes related to metrics"
-    }
-  ],
-  "paths": {
-    "/metrics": {
-      "get": {
-        "tags": [
-          "metrics"
-        ],
-        "summary": "Get metrics",
-        "description": "Get public metrics of the service in JSON format",
-        "operationId": "getMetrics",
-        "responses": {
-          "200": {
-            "description": "JSON object containing metrics",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MetricsResponse"
+  "servers" : [ {
+    "description" : "Production server (uses live data)",
+    "url" : "https://api.pastebin.fi"
+  } ],
+  "tags" : [ {
+    "description" : "Requests related to pastes",
+    "name" : "paste"
+  }, {
+    "description" : "Requestes related to metrics",
+    "name" : "metrics"
+  } ],
+  "paths" : {
+    "/metrics" : {
+      "get" : {
+        "description" : "Get public metrics of the service in JSON format",
+        "operationId" : "getMetrics",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MetricsResponse"
                 }
               }
-            }
+            },
+            "description" : "JSON object containing metrics"
           },
-          "404": {
-            "description": "No metrics available (no pastes created / database query failed)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "title" : "Liitteitä ei löytynyt",
+                  "message" : "Emme ole vastaanottaneet vielä yhtäkään liitettä. Ole ensimmäinen!"
                 },
-                "example": {
-                  "title": "Liitteitä ei löytynyt",
-                  "message": "Emme ole vastaanottaneet vielä yhtäkään liitettä. Ole ensimmäinen!"
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
-            }
-          }
-        }
-      }
-    },
-    "/pastes": {
-      "get": {
-        "tags": [
-          "paste"
-        ],
-        "summary": "Get list of public pastes",
-        "description": "Get list of public pastes",
-        "operationId": "listPastes",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "q",
-            "schema": {
-              "type": "string"
             },
-            "description": "Search for the following text in title and paste (keep in mind that the title is weighted)"
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "schema": {
-              "type": "integer",
-              "default": 0
-            },
-            "description": "The number of pastes to skip before starting to collect the result set"
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "maximum": 30
-            },
-            "description": "The amount of pastes that are returned in the result set."
-          },
-          {
-            "in": "query",
-            "name": "sorting",
-            "schema": {
-              "type": "string",
-              "default": "-date",
-              "enum": [
-                "date",
-                "-date",
-                "meta.views",
-                "-meta.views",
-                "meta.size",
-                "-meta.size"
-              ]
-            },
-            "description": "Sort the results from mongodb with the following method. Hyphen (-) in front of the value switch the sorting to descending order (normally ascending). Has to match the available values or else set to default value."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paste list found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PasteListResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "paste"
-        ],
-        "summary": "Create a paste",
-        "description": "This endpoint is ratelimited to 20 pastes per 30 mins (this might change in the future when accounts come).",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PasteCreateRequest"
-              }
-            }
+            "description" : "No metrics available (no pastes created / database query failed)"
           }
         },
-        "responses": {
-          "200": {
-            "description": "Paste has been created succesfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PasteCreateResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Request body missing",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "title": "Pyynnön vartalo on pakollinen",
-                  "message": "Et voi luoda tyhjää pyyntöä."
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Blocked by safeguards\n\nCurrent safeguards:\n  - AbuseIPDB check\n",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "title": "Pääsy hylätty",
-                  "message": "IP-osoitteesi maine on huono, joten hylkäsimme pyyntösi uuden liitteen luomiseksi."
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "The same content is in another paste",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "title": "Liite on jo olemassa",
-                  "description": "Luotu liite on jo olemassa, joten sitä ei luotu.",
-                  "data": {
-                    "pasteIdentifier": "Daehn4t"
-                  }
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "Exceeds limits defined by server\n\nLimits:\n  - Programming language must be under 30 characters\n  - Paste size must be under 10 MB (Megabytes)\n  - Title must be under 300 characters\n",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "examples": {
-                  "large": {
-                    "summary": "Over 10MB pastes are not allowed",
-                    "value": {
-                      "title": "Liite on liian iso",
-                      "message": "Palveluun ei voi luoda yli kymmenen (10) MB liitteitä."
-                    }
-                  },
-                  "name": {
-                    "summary": "Names over 300 characters are disallowed",
-                    "value": {
-                      "title": "Virheellinen nimi",
-                      "message": "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
-                    }
-                  },
-                  "lang": {
-                    "summary": "Programming language names over 30 characters are disallowed",
-                    "value": {
-                      "title": "Virheellinen ohjelmointikieli",
-                      "message": "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (30) merkkiä."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Unknown error occurred when creating the paste (database connection might have broken)\n",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "title": "Liitettä ei voitu luoda",
-                  "description": "Jotain meni vikaan, eikä liitettä luotu."
-                }
-              }
-            }
-          }
-        }
+        "summary" : "Get metrics",
+        "tags" : [ "metrics" ]
       }
     },
-    "/pastes/{id}": {
-      "get": {
-        "tags": [
-          "paste"
-        ],
-        "summary": "Get paste",
-        "description": "Get paste and its metadata (views & size)",
-        "operationId": "getPaste",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The paste ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paste found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PasteResponse"
+    "/pastes" : {
+      "get" : {
+        "description" : "Get list of public pastes",
+        "operationId" : "listPastes",
+        "parameters" : [ {
+          "description" : "Search for the following text in title and paste (keep in mind that the title is weighted)",
+          "explode" : true,
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "style" : "form"
+        }, {
+          "description" : "The number of pastes to skip before starting to collect the result set",
+          "explode" : true,
+          "in" : "query",
+          "name" : "offset",
+          "required" : false,
+          "schema" : {
+            "default" : 0,
+            "type" : "integer"
+          },
+          "style" : "form"
+        }, {
+          "description" : "The amount of pastes that are returned in the result set.",
+          "explode" : true,
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 0,
+            "maximum" : 30,
+            "type" : "integer"
+          },
+          "style" : "form"
+        }, {
+          "description" : "Sort the results from mongodb with the following method. Hyphen (-) in front of the value switch the sorting to descending order (normally ascending). Has to match the available values or else set to default value.",
+          "explode" : true,
+          "in" : "query",
+          "name" : "sorting",
+          "required" : false,
+          "schema" : {
+            "default" : "-date",
+            "enum" : [ "date", "-date", "meta.views", "-meta.views", "meta.size", "-meta.size" ],
+            "type" : "string"
+          },
+          "style" : "form"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PasteListResponse"
                 }
+              }
+            },
+            "description" : "Paste list found"
+          }
+        },
+        "summary" : "Get list of public pastes",
+        "tags" : [ "paste" ]
+      },
+      "post" : {
+        "description" : "This endpoint is ratelimited to 20 pastes per 30 mins (this might change in the future when accounts come).",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasteCreateRequest"
               }
             }
           },
-          "404": {
-            "description": "Paste not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                },
-                "example": {
-                  "title": "Liitettä ei löytynyt",
-                  "message": "Olemme pahoillamme, mutta hakemaasi liitettä ei löytynyt"
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PasteCreateResponse"
                 }
               }
-            }
+            },
+            "description" : "Paste has been created succesfully"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "title" : "Pyynnön vartalo on pakollinen",
+                  "message" : "Et voi luoda tyhjää pyyntöä."
+                },
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Request body missing"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "title" : "Pääsy hylätty",
+                  "message" : "IP-osoitteesi maine on huono, joten hylkäsimme pyyntösi uuden liitteen luomiseksi."
+                },
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Blocked by safeguards\n\nCurrent safeguards:\n  - AbuseIPDB check\n"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "title" : "Liite on jo olemassa",
+                  "description" : "Luotu liite on jo olemassa, joten sitä ei luotu.",
+                  "data" : {
+                    "pasteIdentifier" : "Daehn4t"
+                  }
+                },
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "The same content is in another paste"
+          },
+          "413" : {
+            "content" : {
+              "application/json" : {
+                "examples" : {
+                  "large" : {
+                    "summary" : "Over 10MB pastes are not allowed",
+                    "value" : {
+                      "title" : "Liite on liian iso",
+                      "message" : "Palveluun ei voi luoda yli kymmenen (10) MB liitteitä."
+                    }
+                  },
+                  "name" : {
+                    "summary" : "Names over 300 characters are disallowed",
+                    "value" : {
+                      "title" : "Virheellinen nimi",
+                      "message" : "Palveluun ei voi luoda liitettä yli 300 merkin otsikolla."
+                    }
+                  },
+                  "lang" : {
+                    "summary" : "Programming language names over 30 characters are disallowed",
+                    "value" : {
+                      "title" : "Virheellinen ohjelmointikieli",
+                      "message" : "Ohjelmointikielen nimi ei voi olla yli kolmeakymmentä (30) merkkiä."
+                    }
+                  }
+                },
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Exceeds limits defined by server\n\nLimits:\n  - Programming language must be under 30 characters\n  - Paste size must be under 10 MB (Megabytes)\n  - Title must be under 300 characters\n"
+          },
+          "500" : {
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "title" : "Liitettä ei voitu luoda",
+                  "description" : "Jotain meni vikaan, eikä liitettä luotu."
+                },
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Unknown error occurred when creating the paste (database connection might have broken)\n"
           }
-        }
+        },
+        "summary" : "Create a paste",
+        "tags" : [ "paste" ]
+      }
+    },
+    "/pastes/{id}" : {
+      "get" : {
+        "description" : "Get paste and its metadata (views & size)",
+        "operationId" : "getPaste",
+        "parameters" : [ {
+          "description" : "The paste ID",
+          "explode" : false,
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "style" : "simple"
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PasteResponse"
+                }
+              }
+            },
+            "description" : "Paste found"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "title" : "Liitettä ei löytynyt",
+                  "message" : "Olemme pahoillamme, mutta hakemaasi liitettä ei löytynyt"
+                },
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Paste not found"
+          }
+        },
+        "summary" : "Get paste",
+        "tags" : [ "paste" ]
       }
     }
   },
-  "components": {
-    "schemas": {
-      "PasteListResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "title": {
-              "type": "string",
-              "description": "Paste title"
-            },
-            "id": {
-              "type": "string",
-              "description": "Paste ID (very useful for querying it later)"
-            },
-            "meta": {
-              "type": "object",
-              "properties": {
-                "views": {
-                  "type": "integer",
-                  "description": "Amount of page loads the paste has received"
-                },
-                "size": {
-                  "type": "integer",
-                  "format": "byte",
-                  "description": "Size in bytes"
-                }
-              }
-            },
-            "date": {
-              "type": "string",
-              "format": "datetime",
-              "description": "Time when paste was created"
-            }
-          },
-          "example": [
-            {
-              "title": "jamsanseutu.fi - 2000009558326 - Maksumuuri poistettu",
-              "id": "GOtkjL0",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 2,
-                "size": 1929
-              },
-              "date": "2023-05-05T05:58:52.590Z"
-            },
-            {
-              "title": "jamsanseutu.fi - 2000009560587 - Maksumuuri poistettu",
-              "id": "MOaY1Ux",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 4,
-                "size": 7064
-              },
-              "date": "2023-05-05T05:49:57.027Z"
-            },
-            {
-              "title": "Ecoshift Corp, LED Tube Lights Manila Philippines",
-              "id": "fgJRrSP",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 7,
-                "size": 359
-              },
-              "date": "2023-05-04T11:00:18.642Z"
-            },
-            {
-              "title": "hs.fi - 2000009511830 - Maksumuuri poistettu",
-              "id": "WQ9LqBe",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 16,
-                "size": 16650
-              },
-              "date": "2023-05-03T07:32:11.872Z"
-            },
-            {
-              "title": "LinkHelpers Phoenix Digital Marketing",
-              "id": "1uw3d0o",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 12,
-                "size": 506
-              },
-              "date": "2023-05-03T06:15:41.181Z"
-            },
-            {
-              "title": "aamulehti.fi - 2000008948411 - Maksumuuri poistettu",
-              "id": "RDmebqX",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 12,
-                "size": 3382
-              },
-              "date": "2023-05-02T12:51:29.109Z"
-            },
-            {
-              "title": "AI Monthly SEO plans",
-              "id": "IZs1kdC",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 11,
-                "size": 398
-              },
-              "date": "2023-05-02T05:31:15.515Z"
-            },
-            {
-              "title": "Improve local visibility for pastebin.fi",
-              "id": "3iNenOB",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 11,
-                "size": 440
-              },
-              "date": "2023-04-30T12:52:16.058Z"
-            },
-            {
-              "title": "hs.fi - 2000009514770 - Maksumuuri poistettu",
-              "id": "rVTg2Qv",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 23,
-                "size": 37275
-              },
-              "date": "2023-04-30T11:46:01.626Z"
-            },
-            {
-              "title": "",
-              "id": "HRvvPWw",
-              "author": "Tuntematon lataaja",
-              "meta": {
-                "votes": null,
-                "favs": null,
-                "views": 23,
-                "size": 1209
-              },
-              "date": "2023-04-29T12:24:03.176Z"
-            }
-          ]
-        }
+  "components" : {
+    "schemas" : {
+      "PasteListResponse" : {
+        "items" : {
+          "$ref" : "#/components/schemas/PasteListResponse_inner"
+        },
+        "type" : "array"
       },
-      "PasteCreateRequest": {
-        "type": "object",
-        "required": [
-          "title",
-          "paste"
-        ],
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Placeholder text",
-            "description": "Paste title"
+      "PasteCreateRequest" : {
+        "properties" : {
+          "title" : {
+            "description" : "Paste title",
+            "example" : "Placeholder text",
+            "type" : "string"
           },
-          "paste": {
-            "type": "string",
-            "example": "Lorem ipsum dolor sit amet...",
-            "description": "Paste content"
+          "paste" : {
+            "description" : "Paste content",
+            "example" : "Lorem ipsum dolor sit amet...",
+            "type" : "string"
           },
-          "lang": {
-            "type": "string",
-            "default": "text",
-            "example": "python",
-            "description": "Paste programming langauge (currently not used anywhere)"
+          "lang" : {
+            "default" : "text",
+            "description" : "Paste programming langauge (currently not used anywhere)",
+            "example" : "python",
+            "type" : "string"
           },
-          "private": {
-            "type": "boolean",
-            "default": false,
-            "example": true,
-            "description": "Do not show the paste to others (only the ones that have access to the ID can see it)"
+          "private" : {
+            "default" : false,
+            "description" : "Do not show the paste to others (only the ones that have access to the ID can see it)",
+            "example" : true,
+            "type" : "boolean"
           }
-        }
+        },
+        "required" : [ "paste", "title" ],
+        "type" : "object"
       },
-      "PasteCreateResponse": {
-        "type": "object",
-        "required": [
-          "id",
-          "lang"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "Placeholder text",
-            "description": "Paste identifier can be used for a redirect to the paste when created"
+      "PasteCreateResponse" : {
+        "properties" : {
+          "id" : {
+            "description" : "Paste identifier can be used for a redirect to the paste when created",
+            "example" : "Placeholder text",
+            "type" : "string"
           },
-          "lang": {
-            "type": "string",
-            "example": "ts",
-            "default": "plaintext",
-            "description": "Paste programming language reported by [vscode-languagedetection](https://github.com/microsoft/vscode-languagedetection) (that uses [yoeo/guesslang](https://github.com/yoeo/guesslang) model). Language is plaintext when the paste content is under 20 characters or the confidence is under 0.1."
+          "lang" : {
+            "default" : "plaintext",
+            "description" : "Paste programming language reported by [vscode-languagedetection](https://github.com/microsoft/vscode-languagedetection) (that uses [yoeo/guesslang](https://github.com/yoeo/guesslang) model). Language is plaintext when the paste content is under 20 characters or the confidence is under 0.1.",
+            "example" : "ts",
+            "type" : "string"
           }
-        }
+        },
+        "required" : [ "id", "lang" ],
+        "type" : "object"
       },
-      "PasteMeta": {
-        "required": [
-          "views",
-          "size"
-        ],
-        "type": "object",
-        "properties": {
-          "views": {
-            "type": "integer",
-            "example": 1,
-            "description": "Amount of page loads the paste has received"
+      "PasteMeta" : {
+        "properties" : {
+          "views" : {
+            "description" : "Amount of page loads the paste has received",
+            "example" : 1,
+            "type" : "integer"
           },
-          "size": {
-            "type": "integer",
-            "format": "byte",
-            "example": 109,
-            "description": "Size in bytes"
+          "size" : {
+            "description" : "Size in bytes",
+            "example" : 109,
+            "format" : "byte",
+            "type" : "integer"
           }
-        }
+        },
+        "required" : [ "size", "views" ],
+        "type" : "object"
       },
-      "PasteResponse": {
-        "required": [
-          "meta",
-          "title",
-          "id",
-          "hidden",
-          "date",
-          "lang"
-        ],
-        "type": "object",
-        "properties": {
-          "meta": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PasteMeta"
-            }
+      "PasteResponse" : {
+        "properties" : {
+          "meta" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PasteMeta"
+            },
+            "type" : "array"
           },
-          "title": {
-            "type": "string",
-            "example": "Example title"
+          "title" : {
+            "example" : "Example title",
+            "type" : "string"
           },
-          "id": {
-            "type": "string",
-            "example": "58hMQlk"
+          "id" : {
+            "example" : "58hMQlk",
+            "type" : "string"
           },
-          "hidden": {
-            "type": "boolean",
-            "example": true
+          "hidden" : {
+            "example" : true,
+            "type" : "boolean"
           },
-          "date": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2023-05-03T11:19:20.137Z"
+          "date" : {
+            "example" : "2023-05-03T11:19:20.137Z",
+            "format" : "date-time",
+            "type" : "string"
           },
-          "lang": {
-            "type": "string",
-            "example": "ts",
-            "default": "plaintext",
-            "description": "Paste programming language reported by [vscode-languagedetection](https://github.com/microsoft/vscode-languagedetection) (that uses [yoeo/guesslang](https://github.com/yoeo/guesslang) model). Language is plaintext when the paste content is under 20 characters or the confidence is under 0.1."
+          "lang" : {
+            "default" : "plaintext",
+            "description" : "Paste programming language reported by [vscode-languagedetection](https://github.com/microsoft/vscode-languagedetection) (that uses [yoeo/guesslang](https://github.com/yoeo/guesslang) model). Language is plaintext when the paste content is under 20 characters or the confidence is under 0.1.",
+            "example" : "ts",
+            "type" : "string"
           }
-        }
+        },
+        "required" : [ "date", "hidden", "id", "lang", "meta", "title" ],
+        "type" : "object"
       },
-      "ErrorResponse": {
-        "required": [
-          "title",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "error type",
-            "description": "Error type"
+      "ErrorResponse" : {
+        "properties" : {
+          "title" : {
+            "description" : "Error type",
+            "example" : "error type",
+            "type" : "string"
           },
-          "message": {
-            "type": "string",
-            "example": "",
-            "description": "More specific data of the error"
+          "message" : {
+            "description" : "More specific data of the error",
+            "example" : "",
+            "type" : "string"
           },
-          "data": {
-            "type": "object",
-            "description": "In some cases additional fields are given in the error response",
-            "properties": {
-              "pasteIdentifier": {
-                "type": "string",
-                "description": "existing paste ID"
-              }
-            }
+          "data" : {
+            "$ref" : "#/components/schemas/ErrorResponse_data"
           }
-        }
+        },
+        "required" : [ "message", "title" ],
+        "type" : "object"
       },
-      "MetricsResponse": {
-        "required": [
-          "totalViews",
-          "pasteCount - total - public - private"
-        ],
-        "type": "object",
-        "properties": {
-          "totalviews": {
-            "type": "integer",
-            "example": 138953,
-            "description": "Sum of all paste views"
+      "MetricsResponse" : {
+        "properties" : {
+          "totalviews" : {
+            "description" : "Sum of all paste views",
+            "example" : 138953,
+            "type" : "integer"
           },
-          "pasteCount": {
-            "type": "object",
-            "properties": {
-              "total": {
-                "type": "integer",
-                "description": "Amount of all pastes (both public and private)",
-                "example": 1557
-              },
-              "public": {
-                "type": "integer",
-                "description": "Amount of public pastes",
-                "example": 1129
-              },
-              "private": {
-                "type": "integer",
-                "description": "Amount of private pastes",
-                "example": 428
-              }
-            }
+          "pasteCount" : {
+            "$ref" : "#/components/schemas/MetricsResponse_pasteCount"
           }
-        }
+        },
+        "required" : [ "pasteCount - total - public - private", "totalViews" ],
+        "type" : "object"
+      },
+      "PasteListResponse_inner_meta" : {
+        "properties" : {
+          "views" : {
+            "description" : "Amount of page loads the paste has received",
+            "type" : "integer"
+          },
+          "size" : {
+            "description" : "Size in bytes",
+            "format" : "byte",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PasteListResponse_inner" : {
+        "example" : [ {
+          "title" : "jamsanseutu.fi - 2000009558326 - Maksumuuri poistettu",
+          "id" : "GOtkjL0",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 2,
+            "size" : 1929
+          },
+          "date" : "2023-05-05T05:58:52.590Z"
+        }, {
+          "title" : "jamsanseutu.fi - 2000009560587 - Maksumuuri poistettu",
+          "id" : "MOaY1Ux",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 4,
+            "size" : 7064
+          },
+          "date" : "2023-05-05T05:49:57.027Z"
+        }, {
+          "title" : "Ecoshift Corp, LED Tube Lights Manila Philippines",
+          "id" : "fgJRrSP",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 7,
+            "size" : 359
+          },
+          "date" : "2023-05-04T11:00:18.642Z"
+        }, {
+          "title" : "hs.fi - 2000009511830 - Maksumuuri poistettu",
+          "id" : "WQ9LqBe",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 16,
+            "size" : 16650
+          },
+          "date" : "2023-05-03T07:32:11.872Z"
+        }, {
+          "title" : "LinkHelpers Phoenix Digital Marketing",
+          "id" : "1uw3d0o",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 12,
+            "size" : 506
+          },
+          "date" : "2023-05-03T06:15:41.181Z"
+        }, {
+          "title" : "aamulehti.fi - 2000008948411 - Maksumuuri poistettu",
+          "id" : "RDmebqX",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 12,
+            "size" : 3382
+          },
+          "date" : "2023-05-02T12:51:29.109Z"
+        }, {
+          "title" : "AI Monthly SEO plans",
+          "id" : "IZs1kdC",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 11,
+            "size" : 398
+          },
+          "date" : "2023-05-02T05:31:15.515Z"
+        }, {
+          "title" : "Improve local visibility for pastebin.fi",
+          "id" : "3iNenOB",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 11,
+            "size" : 440
+          },
+          "date" : "2023-04-30T12:52:16.058Z"
+        }, {
+          "title" : "hs.fi - 2000009514770 - Maksumuuri poistettu",
+          "id" : "rVTg2Qv",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 23,
+            "size" : 37275
+          },
+          "date" : "2023-04-30T11:46:01.626Z"
+        }, {
+          "title" : "",
+          "id" : "HRvvPWw",
+          "author" : "Tuntematon lataaja",
+          "meta" : {
+            "votes" : null,
+            "favs" : null,
+            "views" : 23,
+            "size" : 1209
+          },
+          "date" : "2023-04-29T12:24:03.176Z"
+        } ],
+        "properties" : {
+          "title" : {
+            "description" : "Paste title",
+            "type" : "string"
+          },
+          "id" : {
+            "description" : "Paste ID (very useful for querying it later)",
+            "type" : "string"
+          },
+          "meta" : {
+            "$ref" : "#/components/schemas/PasteListResponse_inner_meta"
+          },
+          "date" : {
+            "description" : "Time when paste was created",
+            "format" : "datetime",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ErrorResponse_data" : {
+        "description" : "In some cases additional fields are given in the error response",
+        "properties" : {
+          "pasteIdentifier" : {
+            "description" : "existing paste ID",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MetricsResponse_pasteCount" : {
+        "properties" : {
+          "total" : {
+            "description" : "Amount of all pastes (both public and private)",
+            "example" : 1557,
+            "type" : "integer"
+          },
+          "public" : {
+            "description" : "Amount of public pastes",
+            "example" : 1129,
+            "type" : "integer"
+          },
+          "private" : {
+            "description" : "Amount of private pastes",
+            "example" : 428,
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
       }
     }
   }
