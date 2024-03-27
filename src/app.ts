@@ -43,8 +43,9 @@ async function initExpressRouter() {
     app.use(urlencoded({ extended: true, limit: "10mb" }))
     app.use(json({ limit: "10mb" }))
     app.use(require("cookie-parser")())
-
-    if (config.corsEnabled)
+    
+    if (config.corsEnabled) {
+        logger.log(`CORS enabled with origin(s): ${config.corsAllowed.join(', ')}`)
         app.use(
             cors({
                 credentials: true,
@@ -52,6 +53,7 @@ async function initExpressRouter() {
                 allowedHeaders: ["Content-Type"],
             })
         )
+    }
 
     new Routes()
     app.use("/", new General().router)
